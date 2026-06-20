@@ -1,0 +1,60 @@
+# ==============================================================
+# OFOS .gitignore
+# ==============================================================
+
+# ==================== Build ====================
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ==================== IDE ====================
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### VS Code ###
+.vscode/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ==================== Environment ====================
+.env
+*.env.local
+
+# ==================== OS ====================
+.DS_Store
+Thumbs.db
+
+# ==================== Logs ====================
+*.log
+logs/
+
+# ==================== Frontend ====================
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# ==================== Misc ====================
+*.swp
+*.swo
+*~

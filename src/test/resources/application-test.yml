@@ -1,0 +1,32 @@
+# ==============================================================
+# OFOS — Test Profile
+# ==============================================================
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:ofos_test_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: false  # Use ddl-auto for tests, Flyway for prod
+
+app:
+  jwt:
+    secret: test-secret-key-that-is-at-least-32-characters-long-for-hmac
+    access-token-expiration-ms: 1800000
+    refresh-token-expiration-ms: 604800000
+
+springdoc:
+  swagger-ui:
+    enabled: false
