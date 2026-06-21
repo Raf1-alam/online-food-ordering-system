@@ -148,7 +148,7 @@ const RestaurantApplication = () => {
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">Business License Document URL</label>
               <input
-                type="url" name="businessLicenseUrl"
+                type="text" name="businessLicenseUrl"
                 className="w-full bg-dark border border-dark-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary-500 transition-colors"
                 placeholder="https://drive.google.com/... (optional for demo)"
                 value={formData.businessLicenseUrl} onChange={handleChange}
