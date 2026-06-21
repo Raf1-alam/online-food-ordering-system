@@ -30,4 +30,7 @@ public class MenuItemRequest {
     private String category;
 
     private Boolean available;
+
+    @Size(max = 500, message = "Image URL must not exceed 500 characters")
+    private String imageUrl;
 }

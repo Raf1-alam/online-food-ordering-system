@@ -47,6 +47,12 @@ const Navbar = ({ onCartClick }) => {
                 </Link>
               )}
 
+              {user.role === 'CUSTOMER' && (
+                  <Link to="/apply-partner" className="text-primary-400 hover:text-primary-300 transition-colors text-sm font-medium">
+                    Become a Partner
+                  </Link>
+              )}
+
               {/* User Dropdown / Profile (Simplified) */}
               <div className="flex items-center space-x-4 border-l border-dark-border pl-4">
                 <div className="flex items-center space-x-2 text-sm text-slate-300">

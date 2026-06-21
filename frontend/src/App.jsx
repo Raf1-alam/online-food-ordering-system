@@ -17,6 +17,7 @@ import Checkout from './pages/Checkout';
 import StaffDashboard from './pages/StaffDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import RestaurantList from './pages/RestaurantList';
+import RestaurantApplication from './pages/RestaurantApplication';
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const { user, loading } = useAuth();
@@ -54,6 +55,11 @@ const App = () => {
                 <Route path="/checkout" element={
                   <ProtectedRoute allowedRoles={['CUSTOMER']}>
                     <Checkout />
+                  </ProtectedRoute>
+                } />
+                <Route path="/apply-partner" element={
+                  <ProtectedRoute allowedRoles={['CUSTOMER']}>
+                    <RestaurantApplication />
                   </ProtectedRoute>
                 } />
                 

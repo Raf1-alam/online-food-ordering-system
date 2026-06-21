@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChefHat, CheckCircle, Package, Truck, XCircle, Clock } from 'lucide-react';
+import { ChefHat, CheckCircle, Package, Truck, XCircle, Clock, UtensilsCrossed } from 'lucide-react';
+import MenuManagement from '../components/MenuManagement';
 
 const ORDER_STATES = ['PLACED', 'CONFIRMED', 'PREPARING', 'OUT_FOR_DELIVERY', 'DELIVERED'];
 const TERMINAL_STATES = ['DELIVERED', 'CANCELLED'];
@@ -10,7 +11,7 @@ const TERMINAL_STATES = ['DELIVERED', 'CANCELLED'];
 const StaffDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('ACTIVE'); // ACTIVE or HISTORY
+  const [activeTab, setActiveTab] = useState('ACTIVE'); // ACTIVE, HISTORY, MENU
   const { user } = useAuth();
   
   // Hardcoded for demo if staff doesn't have a specific restaurant in context. 
@@ -84,16 +85,24 @@ const StaffDashboard = () => {
             Live Orders ({activeOrders.length})
           </button>
           <button 
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'HISTORY' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-white'}`}
+            className={`px-4 py-2 flex items-center gap-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'HISTORY' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-white'}`}
             onClick={() => setActiveTab('HISTORY')}
           >
-            History
+            <Clock className="h-4 w-4" /> History
+          </button>
+          <button 
+            className={`px-4 py-2 flex items-center gap-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'MENU' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-white'}`}
+            onClick={() => setActiveTab('MENU')}
+          >
+            <UtensilsCrossed className="h-4 w-4" /> Menu
           </button>
         </div>
       </div>
 
-      {loading && orders.length === 0 ? (
+      {loading && activeTab !== 'MENU' && orders.length === 0 ? (
         <div className="flex justify-center py-20"><div className="animate-spin h-10 w-10 border-2 border-primary-500 rounded-full border-t-transparent"></div></div>
+      ) : activeTab === 'MENU' ? (
+        <MenuManagement restaurantId={restaurantId} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           <AnimatePresence>

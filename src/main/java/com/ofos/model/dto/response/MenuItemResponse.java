@@ -19,6 +19,7 @@ public class MenuItemResponse {
     private BigDecimal price;
     private String category;
     private boolean available;
+    private String imageUrl;
     private Long restaurantId;
     private String restaurantName;
 }

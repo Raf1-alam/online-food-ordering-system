@@ -55,6 +55,7 @@ public class MenuServiceImpl implements MenuService {
                 .price(request.getPrice())
                 .category(request.getCategory())
                 .available(request.getAvailable() != null ? request.getAvailable() : true)
+                .imageUrl(request.getImageUrl())
                 .restaurant(restaurant)
                 .build();
 
@@ -78,6 +79,9 @@ public class MenuServiceImpl implements MenuService {
         item.setCategory(request.getCategory());
         if (request.getAvailable() != null) {
             item.setAvailable(request.getAvailable());
+        }
+        if (request.getImageUrl() != null) {
+            item.setImageUrl(request.getImageUrl());
         }
 
         item = menuItemRepository.save(item);
@@ -126,6 +130,7 @@ public class MenuServiceImpl implements MenuService {
                 .price(item.getPrice())
                 .category(item.getCategory())
                 .available(item.isAvailable())
+                .imageUrl(item.getImageUrl())
                 .restaurantId(item.getRestaurant().getId())
                 .restaurantName(item.getRestaurant().getName())
                 .build();

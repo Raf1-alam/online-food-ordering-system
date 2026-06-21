@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Receipt, ShieldAlert, CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
+import { Users, Receipt, ShieldAlert, CheckCircle2, XCircle, RefreshCw, FileText } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('USERS');
   const [users, setUsers] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,9 +20,12 @@ const AdminDashboard = () => {
       if (activeTab === 'USERS') {
         const res = await api.get('/admin/users?size=50');
         setUsers(res.data.data.content);
-      } else {
+      } else if (activeTab === 'TRANSACTIONS') {
         const res = await api.get('/admin/transactions?size=50');
         setTransactions(res.data.data.content);
+      } else if (activeTab === 'APPLICATIONS') {
+        const res = await api.get('/applications?size=50');
+        setApplications(res.data.data.content);
       }
     } catch (err) {
       console.error(`Failed to fetch ${activeTab.toLowerCase()}`, err);
@@ -45,6 +49,24 @@ const AdminDashboard = () => {
       setUsers(users.map(u => u.id === userId ? res.data.data : u));
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update user role');
+    }
+  };
+
+  const handleApproveApplication = async (appId) => {
+    try {
+      await api.post(`/applications/${appId}/approve`, "Approved by Admin");
+      fetchData();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to approve application');
+    }
+  };
+
+  const handleRejectApplication = async (appId) => {
+    try {
+      await api.post(`/applications/${appId}/reject`, "Rejected by Admin");
+      fetchData();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to reject application');
     }
   };
 
@@ -72,6 +94,12 @@ const AdminDashboard = () => {
             onClick={() => setActiveTab('TRANSACTIONS')}
           >
             <Receipt className="h-4 w-4" /> Transactions
+          </button>
+          <button 
+            className={`px-4 py-2 flex items-center gap-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'APPLICATIONS' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-white'}`}
+            onClick={() => setActiveTab('APPLICATIONS')}
+          >
+            <FileText className="h-4 w-4" /> Applications
           </button>
         </div>
       </div>
@@ -174,6 +202,75 @@ const AdminDashboard = () => {
                   ))}
                   {transactions.length === 0 && (
                     <tr><td colSpan="5" className="p-8 text-center text-slate-500">No transactions found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* APPLICATIONS TAB */}
+          {activeTab === 'APPLICATIONS' && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-dark-border/50 text-slate-300 text-sm border-b border-dark-border">
+                    <th className="p-4 font-semibold">User / Date</th>
+                    <th className="p-4 font-semibold">Restaurant Info</th>
+                    <th className="p-4 font-semibold">License</th>
+                    <th className="p-4 font-semibold text-center">Status</th>
+                    <th className="p-4 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {applications.map(app => (
+                    <tr key={app.id} className="border-b border-dark-border hover:bg-dark-border/20 transition-colors">
+                      <td className="p-4">
+                        <div className="font-medium text-white">{app.userName}</div>
+                        <div className="text-xs text-slate-500">{new Date(app.createdAt).toLocaleDateString()}</div>
+                      </td>
+                      <td className="p-4">
+                        <div className="text-primary-400 font-medium">{app.restaurantName}</div>
+                        <div className="text-slate-400 text-xs">{app.address}</div>
+                        <div className="text-slate-400 text-xs">{app.phone}</div>
+                      </td>
+                      <td className="p-4">
+                        {app.businessLicenseUrl ? (
+                          <a href={app.businessLicenseUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-400 hover:underline">View License</a>
+                        ) : (
+                          <span className="text-xs text-slate-500">N/A</span>
+                        )}
+                      </td>
+                      <td className="p-4 text-center">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          app.status === 'APPROVED' ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-500/20' : 
+                          app.status === 'REJECTED' ? 'bg-red-900/30 text-red-400 border border-red-500/20' : 
+                          'bg-amber-900/30 text-amber-400 border border-amber-500/20'
+                        }`}>
+                          {app.status}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right space-x-2">
+                        {app.status === 'PENDING' && (
+                          <>
+                            <button 
+                              onClick={() => handleApproveApplication(app.id)}
+                              className="text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded transition-colors"
+                            >
+                              Approve
+                            </button>
+                            <button 
+                              onClick={() => handleRejectApplication(app.id)}
+                              className="text-xs font-medium bg-dark-border hover:bg-red-600/80 text-white px-3 py-1 rounded transition-colors"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {applications.length === 0 && (
+                    <tr><td colSpan="5" className="p-8 text-center text-slate-500">No applications found.</td></tr>
                   )}
                 </tbody>
               </table>
