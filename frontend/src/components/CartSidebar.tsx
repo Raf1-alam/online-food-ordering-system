@@ -119,6 +119,19 @@ const CartSidebar = ({ isOpen, onClose }) => {
             {/* Footer / Checkout */}
             {cart && cart.items.length > 0 && (
               <div className="p-4 border-t border-dark-border bg-dark/50">
+                
+                {/* Promo Code Input */}
+                <div className="flex gap-2 mb-4">
+                  <input 
+                    type="text" 
+                    placeholder="Promo Code" 
+                    className="input-field py-2 text-sm flex-1 bg-dark-card"
+                  />
+                  <button className="btn-outline px-4 py-2 text-sm border-primary-500/50 hover:bg-primary-500/10">
+                    Apply
+                  </button>
+                </div>
+
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-slate-300">Total ({cart.totalItems} items)</span>
                   <span className="text-2xl font-bold text-white">${cart.totalAmount.toFixed(2)}</span>

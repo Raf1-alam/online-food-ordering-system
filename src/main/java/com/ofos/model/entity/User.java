@@ -48,6 +48,15 @@ public class User {
     @Builder.Default
     private boolean active = true;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "user_favorites",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "restaurant_id")
+    )
+    @Builder.Default
+    private java.util.Set<Restaurant> favoriteRestaurants = new java.util.HashSet<>();
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

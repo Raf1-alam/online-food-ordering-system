@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -9,35 +9,46 @@
     @apply bg-dark text-slate-100 font-sans antialiased selection:bg-primary-500 selection:text-white;
     margin: 0;
     min-height: 100vh;
+    background-image: radial-gradient(circle at 15% 50%, rgba(255, 30, 56, 0.05), transparent 25%),
+                      radial-gradient(circle at 85% 30%, rgba(52, 211, 42, 0.05), transparent 25%);
+  }
+
+  h1, h2, .font-serif {
+    font-family: 'Playfair Display', serif;
   }
 }
 
 @layer components {
-  /* Glassmorphism Panel */
+  /* Premium Glassmorphism */
   .glass-panel {
-    @apply bg-dark-card/80 backdrop-blur-md border border-dark-border rounded-xl shadow-xl;
+    @apply bg-dark-card/40 backdrop-blur-2xl border border-dark-border/40 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.6)] transition-all duration-300;
   }
 
-  /* Premium Buttons */
+  /* Neon Primary Buttons */
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-500 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform active:scale-95 shadow-[0_0_15px_rgba(225,29,72,0.5)];
+    @apply bg-primary-500 hover:bg-primary-400 text-white font-bold py-3.5 px-8 rounded-full transition-all duration-300 transform shadow-[0_0_20px_rgba(255,30,56,0.5)] hover:shadow-[0_0_30px_rgba(255,30,56,0.8)] hover:-translate-y-1 active:translate-y-0 active:scale-95 tracking-wide;
+  }
+
+  /* Neon Green Success Buttons */
+  .btn-success {
+    @apply bg-accent-green hover:bg-[#40f533] text-white font-bold py-3.5 px-8 rounded-full transition-all duration-300 transform shadow-[0_0_20px_rgba(52,211,42,0.4)] hover:shadow-[0_0_30px_rgba(52,211,42,0.7)] hover:-translate-y-1 active:translate-y-0 active:scale-95 tracking-wide;
   }
 
   .btn-secondary {
-    @apply bg-dark-border hover:bg-slate-600 text-slate-100 font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform active:scale-95;
+    @apply bg-dark-border/60 hover:bg-slate-700/80 backdrop-blur-md text-white font-semibold py-3.5 px-8 rounded-full transition-all duration-300 transform hover:-translate-y-1 active:translate-y-0 active:scale-95 border border-slate-600/30 shadow-lg hover:shadow-xl;
   }
   
   .btn-outline {
-    @apply border-2 border-primary-600 text-primary-500 hover:bg-primary-600 hover:text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform active:scale-95;
+    @apply border border-slate-300/30 text-slate-200 hover:bg-slate-800/50 font-bold py-3.5 px-8 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2 backdrop-blur-sm;
   }
 
   /* Premium Inputs */
   .input-field {
-    @apply w-full bg-dark/50 border border-dark-border rounded-lg px-4 py-2.5 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300;
+    @apply w-full bg-dark/40 border border-dark-border/50 rounded-2xl px-5 py-4 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/70 focus:border-primary-500/70 focus:bg-dark-card/60 transition-all duration-300 shadow-inner;
   }
   
   .label-text {
-    @apply block text-sm font-medium text-slate-300 mb-1.5;
+    @apply block text-sm font-semibold text-slate-300 mb-2 tracking-wide uppercase text-xs;
   }
 }
 
@@ -47,14 +58,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #181312;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #382a28;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #FF1E38;
 }

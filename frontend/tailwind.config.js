@@ -8,22 +8,25 @@ export default {
     extend: {
       colors: {
         primary: {
-          50: '#fff1f2',
-          100: '#ffe4e6',
-          200: '#fecdd3',
-          300: '#fda4af',
-          400: '#fb7185',
-          500: '#f43f5e',
-          600: '#e11d48',
-          700: '#be123c',
-          800: '#9f1239',
-          900: '#881337',
-          950: '#4c0519',
+          50: '#fff0f1',
+          100: '#ffe3e5',
+          200: '#ffcdd1',
+          300: '#ff9ba4',
+          400: '#ff5c6d',
+          500: '#ff1e38', // Neon Red
+          600: '#e6122a',
+          700: '#be0a1f',
+          800: '#9e0d1d',
+          900: '#85101c',
+          950: '#4a030b',
+        },
+        accent: {
+          green: '#34D32A' // Neon Green
         },
         dark: {
-          DEFAULT: '#0f172a',
-          card: '#1e293b',
-          border: '#334155'
+          DEFAULT: '#181312', // Warm Black
+          card: '#221a19',
+          border: '#382a28'
         }
       },
       fontFamily: {
