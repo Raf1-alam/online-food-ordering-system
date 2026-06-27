@@ -24,16 +24,38 @@ const RestaurantList = () => {
         setLoading(false);
       }
     };
+
+    const fetchFavorites = async () => {
+      try {
+        const res = await api.get('/favorites');
+        setFavorites(new Set(res.data.data || []));
+      } catch (error) {
+        console.error('Failed to fetch favorites:', error);
+      }
+    };
+
     fetchRestaurants();
+    if (localStorage.getItem('ofos_token')) {
+      fetchFavorites();
+    }
   }, []);
 
-  const toggleFavorite = (id: number) => {
-    setFavorites(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) newSet.delete(id);
-      else newSet.add(id);
-      return newSet;
-    });
+  const toggleFavorite = async (id: number) => {
+    if (!localStorage.getItem('ofos_token')) {
+      alert('Please log in to save favorites.');
+      return;
+    }
+    try {
+      await api.post(`/favorites/${id}`);
+      setFavorites(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(id)) newSet.delete(id);
+        else newSet.add(id);
+        return newSet;
+      });
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+    }
   };
 
   const filteredRestaurants = restaurants
@@ -119,7 +141,7 @@ const RestaurantList = () => {
               <Link to={`/restaurants/${restaurant.id}/menu`} className="block">
                 <div className="h-48 bg-dark-border relative overflow-hidden">
                   <img 
-                    src={`https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80`} 
+                    src={restaurant.imageUrl || `https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80`} 
                     alt={restaurant.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100"
                   />

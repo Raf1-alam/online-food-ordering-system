@@ -46,6 +46,7 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
     private final RestaurantRepository restaurantRepository;
+    private final CouponRepository couponRepository;
     
     // Pattern components
     private final OrderFactory orderFactory;
@@ -68,6 +69,26 @@ public class OrderServiceImpl implements OrderService {
 
         // 1. Factory Pattern: assemble order with price snapshots
         Order order = orderFactory.createOrder(customer, restaurant, cart.getItems(), request.getDeliveryAddress());
+
+        // Process coupon
+        if (request.getCouponCode() != null && !request.getCouponCode().trim().isEmpty()) {
+            Coupon coupon = couponRepository.findByCodeAndActiveTrue(request.getCouponCode())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid or inactive coupon"));
+            
+            if (coupon.getExpiryDate() != null && coupon.getExpiryDate().isBefore(java.time.LocalDateTime.now())) {
+                throw new IllegalArgumentException("Coupon has expired");
+            }
+            
+            java.math.BigDecimal subTotal = order.getTotalAmount();
+            java.math.BigDecimal discountPercentage = coupon.getDiscountPercentage();
+            java.math.BigDecimal discountAmount = subTotal.multiply(discountPercentage).divide(new java.math.BigDecimal("100"), 2, java.math.RoundingMode.HALF_UP);
+            java.math.BigDecimal finalTotal = subTotal.subtract(discountAmount);
+            
+            order.setCoupon(coupon);
+            order.setDiscountAmount(discountAmount);
+            order.setTotalAmount(finalTotal);
+        }
+
         order = orderRepository.save(order);
 
         // 2. Strategy Pattern: process payment based on selected method
@@ -225,6 +246,8 @@ public class OrderServiceImpl implements OrderService {
                 .restaurantName(order.getRestaurant().getName())
                 .items(itemResponses)
                 .totalAmount(order.getTotalAmount())
+                .discountAmount(order.getDiscountAmount())
+                .couponCode(order.getCoupon() != null ? order.getCoupon().getCode() : null)
                 .status(order.getStatus())
                 .deliveryAddress(order.getDeliveryAddress())
                 .payment(paymentInfo)

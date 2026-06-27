@@ -4,7 +4,7 @@ import api from '../services/api';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Check, Search, AlertCircle, Star } from 'lucide-react';
+import { Plus, Check, Search, AlertCircle, Star, Utensils } from 'lucide-react';
 import { Restaurant, MenuItem } from '../types';
 
 const Menu = () => {
@@ -174,15 +174,17 @@ const Menu = () => {
                     className="glass-panel p-5 flex justify-between group hover:shadow-[0_0_20px_rgba(225,29,72,0.15)] hover:border-primary-500/40 transition-all duration-300"
                   >
                     <div className="flex-1 flex gap-5 pr-4">
-                      {item.imageUrl && (
-                        <div className="shrink-0 w-28 h-28 rounded-xl overflow-hidden shadow-md bg-dark-card border border-dark-border">
+                      <div className="shrink-0 w-28 h-28 rounded-xl overflow-hidden shadow-md bg-dark-card border border-dark-border flex items-center justify-center text-slate-500">
+                        {item.imageUrl ? (
                           <img 
                             src={item.imageUrl} 
                             alt={item.name} 
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                           />
-                        </div>
-                      )}
+                        ) : (
+                          <Utensils className="h-8 w-8 text-slate-500/60" />
+                        )}
+                      </div>
                       <div className="flex flex-col justify-between py-1">
                         <div>
                           <h3 className="text-xl font-semibold text-white group-hover:text-primary-400 transition-colors">{item.name}</h3>

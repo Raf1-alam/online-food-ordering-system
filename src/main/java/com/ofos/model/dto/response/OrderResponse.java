@@ -25,6 +25,8 @@ public class OrderResponse {
     private String restaurantName;
     private List<OrderItemResponse> items;
     private BigDecimal totalAmount;
+    private BigDecimal discountAmount;
+    private String couponCode;
     private OrderStatus status;
     private String deliveryAddress;
     private PaymentInfo payment;

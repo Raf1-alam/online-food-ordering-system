@@ -78,6 +78,17 @@ const Orders = () => {
     }
   };
 
+  const handleCancelOrder = async (orderId: number) => {
+    if (!window.confirm(`Are you sure you want to cancel order #${orderId}?`)) return;
+    try {
+      await api.post(`/orders/${orderId}/cancel`);
+      // Update local state status to CANCELLED instantly
+      setOrders(prevOrders => prevOrders.map(o => o.id === orderId ? { ...o, status: 'CANCELLED' } : o));
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to cancel order.');
+    }
+  };
+
   const fetchOrders = async (pageNumber: number, isInitial = false) => {
     try {
       if (isInitial) setLoading(true);
@@ -235,6 +246,18 @@ const Orders = () => {
                         Rate & Review
                       </button>
                     )}
+                  </div>
+                )}
+
+                {/* Cancel Button for Placed Orders */}
+                {order.status === 'PLACED' && (
+                  <div className="mt-6 pt-6 border-t border-dark-border/40 flex justify-end">
+                    <button 
+                      onClick={() => handleCancelOrder(order.id)}
+                      className="bg-transparent border border-red-500/50 hover:bg-red-500/10 text-red-500 font-semibold py-2 px-6 rounded-full text-sm transition-colors"
+                    >
+                      Cancel Order
+                    </button>
                   </div>
                 )}
               </motion.div>

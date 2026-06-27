@@ -14,6 +14,32 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [successOrder, setSuccessOrder] = useState(null);
   const [error, setError] = useState('');
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponError, setCouponError] = useState('');
+  const [couponSuccess, setCouponSuccess] = useState('');
+  const [checkingCoupon, setCheckingCoupon] = useState(false);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCheckingCoupon(true);
+    setCouponError('');
+    setCouponSuccess('');
+    try {
+      const res = await api.get(`/coupons/validate/${couponCode.trim()}`);
+      const discount = res.data.data;
+      setCouponDiscount(discount);
+      setAppliedCoupon(couponCode.trim());
+      setCouponSuccess(`Coupon applied! ${discount}% off`);
+    } catch (err: any) {
+      setCouponError(err.response?.data?.message || 'Invalid or expired coupon');
+      setCouponDiscount(0);
+      setAppliedCoupon('');
+    } finally {
+      setCheckingCoupon(false);
+    }
+  };
 
   if (!cart || cart.items.length === 0) {
     if (successOrder) return <SuccessView order={successOrder} />;
@@ -36,10 +62,11 @@ const Checkout = () => {
     setError('');
 
     try {
-      // The backend computes the total from the cart entity. We just provide method and address.
+      // The backend computes the total from the cart entity. We just provide method, address, and coupon code.
       const res = await api.post('/orders', {
         paymentMethod,
-        deliveryAddress: address
+        deliveryAddress: address,
+        couponCode: appliedCoupon || null
       });
       setSuccessOrder(res.data.data);
       // Refresh cart to show it's empty globally
@@ -88,6 +115,42 @@ const Checkout = () => {
               Payment processing uses the Strategy Design Pattern dynamically selecting the appropriate processor.
             </p>
           </div>
+
+          <div className="glass-panel p-6 space-y-4">
+            <h2 className="text-xl font-semibold text-white flex items-center gap-2 border-b border-dark-border pb-3">
+              <span className="text-primary-500 font-bold">%</span> Promo Code
+            </h2>
+            <div className="flex gap-3">
+              <input 
+                type="text" 
+                placeholder="Enter promo code (e.g. FOODY20)" 
+                className="input-field flex-1"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                disabled={!!appliedCoupon}
+              />
+              {appliedCoupon ? (
+                <button 
+                  type="button"
+                  onClick={() => { setAppliedCoupon(''); setCouponDiscount(0); setCouponSuccess(''); }}
+                  className="bg-red-950 border border-red-500/50 hover:bg-red-900/45 text-red-200 px-6 py-2.5 rounded-lg text-sm font-semibold transition"
+                >
+                  Remove
+                </button>
+              ) : (
+                <button 
+                  type="button"
+                  onClick={handleApplyCoupon}
+                  disabled={checkingCoupon || !couponCode.trim()}
+                  className="btn-primary py-2.5 px-6 text-sm font-semibold"
+                >
+                  {checkingCoupon ? 'Checking...' : 'Apply'}
+                </button>
+              )}
+            </div>
+            {couponError && <p className="text-xs text-red-400 mt-1">{couponError}</p>}
+            {couponSuccess && <p className="text-xs text-emerald-400 mt-1">{couponSuccess}</p>}
+          </div>
         </div>
 
         {/* Right Col: Order Summary */}
@@ -105,10 +168,26 @@ const Checkout = () => {
               ))}
             </div>
             
+            {/* Discount display */}
+            {couponDiscount > 0 && (
+              <div className="border-t border-dark-border pt-4 space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-slate-400">Subtotal</span>
+                  <span className="text-slate-300">${cart.totalAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm text-emerald-400">
+                  <span>Discount ({couponDiscount}%)</span>
+                  <span>-${(cart.totalAmount * couponDiscount / 100).toFixed(2)}</span>
+                </div>
+              </div>
+            )}
+
             <div className="border-t border-dark-border pt-4 mb-6">
               <div className="flex justify-between items-center text-lg">
                 <span className="font-medium text-slate-300">Total</span>
-                <span className="font-bold text-emerald-400">${cart.totalAmount.toFixed(2)}</span>
+                <span className="font-bold text-emerald-400">
+                  ${(cart.totalAmount * (1 - couponDiscount / 100)).toFixed(2)}
+                </span>
               </div>
             </div>
 
@@ -120,7 +199,7 @@ const Checkout = () => {
               {isProcessing ? (
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
               ) : (
-                <>Order ${cart.totalAmount.toFixed(2)}</>
+                <>Order ${(cart.totalAmount * (1 - couponDiscount / 100)).toFixed(2)}</>
               )}
             </button>
           </div>

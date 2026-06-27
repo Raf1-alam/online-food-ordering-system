@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../context/CartContext';
-import { Utensils, ShoppingCart, User as UserIcon, LogOut, LayoutDashboard, ChevronDown, ListOrdered, Search } from 'lucide-react';
+import { Utensils, ShoppingCart, User as UserIcon, LogOut, LayoutDashboard, ChevronDown, ListOrdered, Search, Heart } from 'lucide-react';
 
 const Navbar = ({ onCartClick }: { onCartClick: () => void }) => {
   const { user, logout } = useAuth();
@@ -30,8 +30,8 @@ const Navbar = ({ onCartClick }: { onCartClick: () => void }) => {
     { name: 'Home', path: '/' },
     { name: 'Menu', path: '/restaurants' },
     { name: 'Partner with Us', path: '/apply-partner' },
-    { name: 'About Us', path: '#' },
-    { name: 'Contact', path: '#' },
+    { name: 'About Us', path: '/about' },
+    { name: 'Contact', path: '/contact' },
   ];
 
   return (
@@ -129,13 +129,22 @@ const Navbar = ({ onCartClick }: { onCartClick: () => void }) => {
                     </Link>
                     
                     {user.role === 'CUSTOMER' && (
-                      <Link 
-                        to="/orders" 
-                        onClick={() => setIsDropdownOpen(false)}
-                        className="flex items-center px-4 py-2.5 text-sm text-slate-300 hover:text-primary-400 hover:bg-dark-border/50 transition-colors"
-                      >
-                        <ListOrdered className="h-4 w-4 mr-3" /> My Orders
-                      </Link>
+                      <>
+                        <Link 
+                          to="/orders" 
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="flex items-center px-4 py-2.5 text-sm text-slate-300 hover:text-primary-400 hover:bg-dark-border/50 transition-colors"
+                        >
+                          <ListOrdered className="h-4 w-4 mr-3" /> My Orders
+                        </Link>
+                        <Link 
+                          to="/favorites" 
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="flex items-center px-4 py-2.5 text-sm text-slate-300 hover:text-primary-400 hover:bg-dark-border/50 transition-colors"
+                        >
+                          <Heart className="h-4 w-4 mr-3 text-red-500 fill-red-500" /> Favorites
+                        </Link>
+                      </>
                     )}
 
                     <div className="border-t border-dark-border mt-1 pt-1">

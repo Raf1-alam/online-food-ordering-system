@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Receipt, ShieldAlert, CheckCircle2, XCircle, RefreshCw, FileText } from 'lucide-react';
+import { Users, Receipt, ShieldAlert, CheckCircle2, XCircle, RefreshCw, FileText, Tag } from 'lucide-react';
 import Pagination from '../components/Pagination';
 
 const AdminDashboard = () => {
@@ -9,10 +9,54 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+
+  const [newCoupon, setNewCoupon] = useState({
+    code: '',
+    discountPercentage: '',
+    expiryDate: ''
+  });
+
+  const handleCreateCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCoupon.code.trim() || !newCoupon.discountPercentage) return;
+    try {
+      await api.post('/coupons', {
+        code: newCoupon.code.trim().toUpperCase(),
+        discountPercentage: parseFloat(newCoupon.discountPercentage),
+        expiryDate: newCoupon.expiryDate ? newCoupon.expiryDate + 'T23:59:59' : null
+      });
+      setNewCoupon({ code: '', discountPercentage: '', expiryDate: '' });
+      setPage(0);
+      fetchData(0);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to create coupon');
+    }
+  };
+
+  const handleToggleCoupon = async (couponId: number) => {
+    try {
+      await api.patch(`/coupons/${couponId}/toggle`);
+      setCoupons(coupons.map((c: any) => c.id === couponId ? { ...c, active: !c.active } : c));
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to toggle coupon status');
+    }
+  };
+
+  const handleDeleteCoupon = async (couponId: number) => {
+    if (!window.confirm("Are you sure you want to delete this coupon?")) return;
+    try {
+      await api.delete(`/coupons/${couponId}`);
+      setCoupons(coupons.filter((c: any) => c.id !== couponId));
+      setTotalElements(prev => prev - 1);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to delete coupon');
+    }
+  };
 
   useEffect(() => {
     fetchData(page);
@@ -34,6 +78,11 @@ const AdminDashboard = () => {
       } else if (activeTab === 'APPLICATIONS') {
         const res = await api.get(`/applications?page=${pageNumber}&size=10`);
         setApplications(res.data.data.content || []);
+        setTotalPages(res.data.data.totalPages || 0);
+        setTotalElements(res.data.data.totalElements || 0);
+      } else if (activeTab === 'COUPONS') {
+        const res = await api.get(`/coupons?page=${pageNumber}&size=10`);
+        setCoupons(res.data.data.content || []);
         setTotalPages(res.data.data.totalPages || 0);
         setTotalElements(res.data.data.totalElements || 0);
       }
@@ -110,6 +159,12 @@ const AdminDashboard = () => {
             onClick={() => { setActiveTab('APPLICATIONS'); setPage(0); }}
           >
             <FileText className="h-4 w-4" /> Applications
+          </button>
+          <button 
+            className={`px-4 py-2 flex items-center gap-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'COUPONS' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-white'}`}
+            onClick={() => { setActiveTab('COUPONS'); setPage(0); }}
+          >
+            <Tag className="h-4 w-4" /> Coupons
           </button>
         </div>
       </div>
@@ -285,6 +340,105 @@ const AdminDashboard = () => {
                     )}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {/* COUPONS TAB */}
+            {activeTab === 'COUPONS' && (
+              <div className="space-y-6">
+                {/* Form to create new Coupon */}
+                <div className="p-6 bg-dark-card/30 border-b border-dark-border">
+                  <h3 className="text-lg font-bold text-white mb-4">Create New Coupon</h3>
+                  <form onSubmit={handleCreateCoupon} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Coupon Code</label>
+                      <input 
+                        required
+                        type="text" 
+                        placeholder="e.g. FOODY20" 
+                        value={newCoupon.code}
+                        onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
+                        className="w-full bg-dark border border-dark-border rounded px-3 py-2 text-sm text-white focus:border-primary-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Discount %</label>
+                      <input 
+                        required
+                        type="number" 
+                        min="1" 
+                        max="100" 
+                        placeholder="e.g. 20" 
+                        value={newCoupon.discountPercentage}
+                        onChange={(e) => setNewCoupon({ ...newCoupon, discountPercentage: e.target.value })}
+                        className="w-full bg-dark border border-dark-border rounded px-3 py-2 text-sm text-white focus:border-primary-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Expiry Date (Optional)</label>
+                      <input 
+                        type="date" 
+                        value={newCoupon.expiryDate}
+                        onChange={(e) => setNewCoupon({ ...newCoupon, expiryDate: e.target.value })}
+                        className="w-full bg-dark border border-dark-border rounded px-3 py-2 text-sm text-white focus:border-primary-500 outline-none"
+                      />
+                    </div>
+                    <button 
+                      type="submit"
+                      className="w-full bg-primary-600 hover:bg-primary-500 text-white font-semibold py-2.5 px-4 rounded text-sm transition-all shadow-[0_0_10px_rgba(225,29,72,0.3)]"
+                    >
+                      Create Coupon
+                    </button>
+                  </form>
+                </div>
+
+                {/* Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-dark-border/50 text-slate-300 text-sm border-b border-dark-border">
+                        <th className="p-4 font-semibold">Code</th>
+                        <th className="p-4 font-semibold">Discount</th>
+                        <th className="p-4 font-semibold">Expiry</th>
+                        <th className="p-4 font-semibold text-center">Status</th>
+                        <th className="p-4 font-semibold text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-sm">
+                      {coupons.map((coupon: any) => (
+                        <tr key={coupon.id} className="border-b border-dark-border hover:bg-dark-border/20 transition-colors">
+                          <td className="p-4 font-mono font-bold text-primary-400">{coupon.code}</td>
+                          <td className="p-4 text-emerald-400 font-bold">{coupon.discountPercentage}% OFF</td>
+                          <td className="p-4 text-slate-300">
+                            {coupon.expiryDate ? new Date(coupon.expiryDate).toLocaleDateString() : 'Never'}
+                          </td>
+                          <td className="p-4 text-center">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${coupon.active ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-500/20' : 'bg-red-900/30 text-red-400 border border-red-500/20'}`}>
+                              {coupon.active ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td className="p-4 text-right space-x-3">
+                            <button 
+                              onClick={() => handleToggleCoupon(coupon.id)}
+                              className="text-xs font-medium text-slate-400 hover:text-white transition-colors"
+                            >
+                              {coupon.active ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteCoupon(coupon.id)}
+                              className="text-xs font-medium text-red-400 hover:text-red-300 transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {coupons.length === 0 && (
+                        <tr><td colSpan={5} className="p-8 text-center text-slate-500">No coupons found.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
 

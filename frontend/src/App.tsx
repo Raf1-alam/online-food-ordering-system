@@ -20,6 +20,9 @@ import RestaurantList from './pages/RestaurantList';
 import RestaurantApplication from './pages/RestaurantApplication';
 import Profile from './pages/Profile';
 import MyOrders from './pages/MyOrders';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import Favorites from './pages/Favorites';
 
 const ProtectedRoute = ({ children, allowedRoles = [] }: { children: React.ReactNode; allowedRoles?: string[] }) => {
   const { user, loading } = useAuth();
@@ -69,6 +72,8 @@ const App = () => {
                 <Route path="/register" element={<AdminStaffRedirect><Register /></AdminStaffRedirect>} />
                 <Route path="/restaurants" element={<AdminStaffRedirect><RestaurantList /></AdminStaffRedirect>} />
                 <Route path="/restaurants/:id/menu" element={<AdminStaffRedirect><Menu /></AdminStaffRedirect>} />
+                <Route path="/about" element={<AdminStaffRedirect><About /></AdminStaffRedirect>} />
+                <Route path="/contact" element={<AdminStaffRedirect><Contact /></AdminStaffRedirect>} />
                 
                 {/* Customer Routes */}
                 <Route path="/checkout" element={
@@ -89,6 +94,11 @@ const App = () => {
                 <Route path="/orders" element={
                   <ProtectedRoute allowedRoles={['CUSTOMER']}>
                     <MyOrders />
+                  </ProtectedRoute>
+                } />
+                <Route path="/favorites" element={
+                  <ProtectedRoute allowedRoles={['CUSTOMER']}>
+                    <Favorites />
                   </ProtectedRoute>
                 } />
                 

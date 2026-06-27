@@ -19,4 +19,7 @@ public class OrderRequest {
 
     @Size(max = 500, message = "Delivery address must not exceed 500 characters")
     private String deliveryAddress;
+
+    @Size(max = 50, message = "Coupon code must not exceed 50 characters")
+    private String couponCode;
 }

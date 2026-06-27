@@ -66,6 +66,9 @@ public class SecurityConfig {
                         // Actuator health
                         .requestMatchers("/actuator/health").permitAll()
 
+                        // Public coupon validation
+                        .requestMatchers(HttpMethod.GET, "/api/v1/coupons/validate/**").permitAll()
+
                         // Admin-only endpoints
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 
