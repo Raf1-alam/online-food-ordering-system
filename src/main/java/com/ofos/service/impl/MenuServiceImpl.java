@@ -1,5 +1,6 @@
 package com.ofos.service.impl;
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import com.ofos.exception.ResourceNotFoundException;
 import com.ofos.model.dto.request.MenuItemRequest;
 import com.ofos.model.dto.response.MenuItemResponse;
@@ -117,6 +118,15 @@ public class MenuServiceImpl implements MenuService {
      * IDOR protection — staff can only manage their own restaurant's menu.
      */
     private void verifyOwnership(Restaurant restaurant, Long currentUserId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            return;
+        }
+
         if (!restaurant.getOwner().getId().equals(currentUserId)) {
             throw new AccessDeniedException("You can only manage your own restaurant's menu");
         }
