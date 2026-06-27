@@ -77,7 +77,7 @@ const RestaurantList = () => {
             />
           </div>
           <select 
-            className="input-field w-32 h-12 appearance-none bg-dark-card"
+            className="input-field w-36 h-12 py-0 px-4 appearance-none bg-dark-card cursor-pointer"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
           >

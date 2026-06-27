@@ -23,7 +23,7 @@ const Navbar = ({ onCartClick }: { onCartClick: () => void }) => {
   const handleLogout = () => {
     setIsDropdownOpen(false);
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   const navLinks = [
@@ -47,26 +47,41 @@ const Navbar = ({ onCartClick }: { onCartClick: () => void }) => {
 
         {/* Center Links (Desktop) */}
         <div className="hidden md:flex items-center space-x-8">
-          {navLinks.map((link) => (
+          {!user || user.role === 'CUSTOMER' ? (
+            navLinks.map((link) => (
+              <Link 
+                key={link.name} 
+                to={link.path}
+                className={`text-sm font-medium transition-colors ${
+                  location.pathname === link.path 
+                    ? 'text-primary-500' 
+                    : 'text-slate-300 hover:text-primary-500'
+                }`}
+              >
+                {link.name}
+              </Link>
+            ))
+          ) : (
             <Link 
-              key={link.name} 
-              to={link.path}
+              to={user.role === 'ADMIN' ? "/admin" : "/staff"}
               className={`text-sm font-medium transition-colors ${
-                location.pathname === link.path 
+                location.pathname === (user.role === 'ADMIN' ? '/admin' : '/staff')
                   ? 'text-primary-500' 
                   : 'text-slate-300 hover:text-primary-500'
               }`}
             >
-              {link.name}
+              Dashboard
             </Link>
-          ))}
+          )}
         </div>
 
         {/* Right Section */}
         <div className="flex items-center space-x-6">
-          <button className="text-slate-300 hover:text-primary-500 transition-colors hidden sm:block">
-            <Search className="h-5 w-5" />
-          </button>
+          {(!user || user.role === 'CUSTOMER') && (
+            <button className="text-slate-300 hover:text-primary-500 transition-colors hidden sm:block">
+              <Search className="h-5 w-5" />
+            </button>
+          )}
 
           {user ? (
             <>

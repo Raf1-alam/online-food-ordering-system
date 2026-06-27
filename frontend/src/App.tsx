@@ -21,7 +21,7 @@ import RestaurantApplication from './pages/RestaurantApplication';
 import Profile from './pages/Profile';
 import MyOrders from './pages/MyOrders';
 
-const ProtectedRoute = ({ children, allowedRoles = [] }) => {
+const ProtectedRoute = ({ children, allowedRoles = [] }: { children: React.ReactNode; allowedRoles?: string[] }) => {
   const { user, loading } = useAuth();
 
   if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
@@ -31,7 +31,24 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     return <Navigate to="/" />;
   }
   
-  return children;
+  return <>{children}</>;
+};
+
+const AdminStaffRedirect = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
+
+  if (user) {
+    if (user.role === 'ADMIN') {
+      return <Navigate to="/admin" replace />;
+    }
+    if (user.role === 'RESTAURANT_STAFF') {
+      return <Navigate to="/staff" replace />;
+    }
+  }
+
+  return <>{children}</>;
 };
 
 const App = () => {
@@ -44,14 +61,14 @@ const App = () => {
           <div className="min-h-screen bg-dark text-slate-100 flex flex-col">
             <Navbar onCartClick={() => setIsCartOpen(true)} />
             <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-            <main className="flex-1 container mx-auto px-4 py-8">
+            <main className="flex-1 container mx-auto px-4 pt-28 pb-8">
               <Routes>
                 {/* Public Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/restaurants" element={<RestaurantList />} />
-                <Route path="/restaurants/:id/menu" element={<Menu />} />
+                <Route path="/" element={<AdminStaffRedirect><Home /></AdminStaffRedirect>} />
+                <Route path="/login" element={<AdminStaffRedirect><Login /></AdminStaffRedirect>} />
+                <Route path="/register" element={<AdminStaffRedirect><Register /></AdminStaffRedirect>} />
+                <Route path="/restaurants" element={<AdminStaffRedirect><RestaurantList /></AdminStaffRedirect>} />
+                <Route path="/restaurants/:id/menu" element={<AdminStaffRedirect><Menu /></AdminStaffRedirect>} />
                 
                 {/* Customer Routes */}
                 <Route path="/checkout" element={

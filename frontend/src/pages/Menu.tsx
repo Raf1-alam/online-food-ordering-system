@@ -4,7 +4,7 @@ import api from '../services/api';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Check, Search, AlertCircle } from 'lucide-react';
+import { Plus, Check, Search, AlertCircle, Star } from 'lucide-react';
 import { Restaurant, MenuItem } from '../types';
 
 const Menu = () => {
@@ -15,6 +15,8 @@ const Menu = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [addingItem, setAddingItem] = useState<number | null>(null);
   const [error, setError] = useState('');
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [visibleCount, setVisibleCount] = useState(5);
   
   const { user } = useAuth();
   const { addItem, cart } = useCart();
@@ -22,12 +24,14 @@ const Menu = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [restRes, menuRes] = await Promise.all([
+        const [restRes, menuRes, reviewsRes] = await Promise.all([
           api.get(`/restaurants/${id}`),
-          api.get(`/restaurants/${id}/menu?size=50`)
+          api.get(`/restaurants/${id}/menu?size=50`),
+          api.get(`/reviews/restaurant/${id}`)
         ]);
         setRestaurant(restRes.data.data);
         setMenuItems(menuRes.data.data.content);
+        setReviews(reviewsRes.data.data || []);
       } catch (err) {
         console.error("Failed to fetch menu", err);
         setError('Failed to load menu. Please try again.');
@@ -219,31 +223,52 @@ const Menu = () => {
         )}
       </div>
 
-      {/* Reviews Section (Mock UI for feature expansion) */}
+      {/* Reviews Section */}
       <div className="pt-12 mt-12 border-t border-dark-border">
         <h2 className="text-3xl font-bold text-white mb-8">Customer Reviews</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="glass-panel p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-primary-900 text-primary-500 rounded-full flex items-center justify-center font-bold text-xl">
-                JD
-              </div>
-              <div>
-                <h4 className="font-bold text-white">John Doe</h4>
-                <div className="flex text-amber-400 text-sm">
-                  ★ ★ ★ ★ ★
+        {reviews.length === 0 ? (
+          <div className="glass-panel p-12 text-center text-slate-400 rounded-3xl">
+            No reviews yet for this restaurant. Place an order and be the first to leave a review!
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {reviews.slice(0, visibleCount).map((review) => (
+                <div key={review.id} className="glass-panel p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-primary-950 text-primary-500 rounded-full flex items-center justify-center font-bold text-xl border border-primary-500/20">
+                      {review.userName ? review.userName.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white">{review.userName || 'Customer'}</h4>
+                      <div className="flex text-amber-400 text-sm gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star 
+                            key={i} 
+                            className={`h-4 w-4 ${i < review.rating ? 'text-amber-400 fill-amber-400' : 'text-slate-600'}`} 
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-slate-300">{review.comment || 'No comment provided.'}</p>
                 </div>
-              </div>
+              ))}
             </div>
-            <p className="text-slate-300">The food here is absolutely incredible! Fast delivery and everything was still hot. The red velvet burger is a must-try!</p>
+
+            {reviews.length > visibleCount && (
+              <div className="flex justify-center pt-4">
+                <button 
+                  onClick={() => setVisibleCount(prev => prev + 5)}
+                  className="btn-outline px-8 py-2.5 text-sm"
+                >
+                  View More Reviews
+                </button>
+              </div>
+            )}
           </div>
-          
-          <div className="glass-panel p-6 border-dashed border-2 border-dark-border flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary-500/50 transition-colors">
-            <p className="text-slate-400 mb-4">Have you ordered from {restaurant?.name || 'here'} before?</p>
-            <button className="btn-outline px-6 py-2 text-sm">Leave a Review</button>
-          </div>
-        </div>
+        )}
       </div>
 
     </motion.div>

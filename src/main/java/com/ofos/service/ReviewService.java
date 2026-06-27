@@ -30,9 +30,7 @@ public class ReviewService {
         Restaurant restaurant = restaurantRepository.findById(request.getRestaurantId())
                 .orElseThrow(() -> new RuntimeException("Restaurant not found"));
 
-        if (reviewRepository.existsByUserIdAndRestaurantId(userId, request.getRestaurantId())) {
-            throw new RuntimeException("You have already reviewed this restaurant.");
-        }
+
 
         Review review = new Review();
         review.setUser(user);
