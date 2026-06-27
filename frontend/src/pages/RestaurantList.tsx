@@ -4,8 +4,10 @@ import { Link } from 'react-router-dom';
 import { Star, MapPin, Search } from 'lucide-react';
 import api from '../services/api';
 import { Restaurant } from '../types';
+import { useAuth } from '../hooks/useAuth';
 
 const RestaurantList = () => {
+  const { user } = useAuth();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,13 +37,13 @@ const RestaurantList = () => {
     };
 
     fetchRestaurants();
-    if (localStorage.getItem('ofos_token')) {
+    if (user) {
       fetchFavorites();
     }
-  }, []);
+  }, [user]);
 
   const toggleFavorite = async (id: number) => {
-    if (!localStorage.getItem('ofos_token')) {
+    if (!user) {
       alert('Please log in to save favorites.');
       return;
     }
