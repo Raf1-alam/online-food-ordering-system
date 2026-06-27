@@ -19,8 +19,15 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      await login(email, password);
-      navigate('/');
+      const loggedInUser = await login(email, password);
+      
+      if (loggedInUser.role === 'ADMIN') {
+        navigate('/admin');
+      } else if (loggedInUser.role === 'RESTAURANT_STAFF') {
+        navigate('/staff');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to login. Please try again.');
     } finally {

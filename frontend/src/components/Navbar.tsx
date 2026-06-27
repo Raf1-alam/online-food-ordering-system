@@ -29,6 +29,7 @@ const Navbar = ({ onCartClick }: { onCartClick: () => void }) => {
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Menu', path: '/restaurants' },
+    { name: 'Partner with Us', path: '/apply-partner' },
     { name: 'About Us', path: '#' },
     { name: 'Contact', path: '#' },
   ];
