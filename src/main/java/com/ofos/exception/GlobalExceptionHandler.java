@@ -36,21 +36,21 @@ public class GlobalExceptionHandler {
 
     // ==================== Validation Errors (422) ====================
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationErrors(
-            MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
+@ExceptionHandler(MethodArgumentNotValidException.class)
+public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationErrors(
+        MethodArgumentNotValidException ex) {
+    Map<String, String> errors = new HashMap<>();
+    ex.getBindingResult().getAllErrors().forEach(error -> {
+        String fieldName = ((FieldError) error).getField();
+        String errorMessage = error.getDefaultMessage();
+        errors.put(fieldName, errorMessage);
+    });
 
-        log.warn("Validation failed: {}", errors);
-        return ResponseEntity
-                .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(ApiResponse.error("Validation failed"));
-    }
+    log.warn("Validation failed: {}", errors);
+    return ResponseEntity
+            .status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .body(ApiResponse.error("Validation failed", errors));
+}
 
     // ==================== Business Logic Errors ====================
 
