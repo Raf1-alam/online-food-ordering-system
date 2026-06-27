@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChefHat, CheckCircle, Package, Truck, XCircle, Clock, UtensilsCrossed } from 'lucide-react';
 import MenuManagement from '../components/MenuManagement';
+import Pagination from '../components/Pagination';
 
 const ORDER_STATES = ['PLACED', 'CONFIRMED', 'PREPARING', 'OUT_FOR_DELIVERY', 'DELIVERED'];
 const TERMINAL_STATES = ['DELIVERED', 'CANCELLED'];
@@ -12,6 +13,7 @@ const StaffDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('ACTIVE'); // ACTIVE, HISTORY, MENU
+  const [page, setPage] = useState(0);
   const { user } = useAuth();
   
   const [restaurantId, setRestaurantId] = useState(null);
@@ -56,6 +58,10 @@ const StaffDashboard = () => {
     return () => { if (interval) clearInterval(interval); };
   }, [user]);
 
+  useEffect(() => {
+    setPage(0);
+  }, [activeTab]);
+
   const handleAdvanceStatus = async (orderId, currentStatus) => {
     const currentIndex = ORDER_STATES.indexOf(currentStatus);
     if (currentIndex === -1 || currentIndex === ORDER_STATES.length - 1) return;
@@ -83,10 +89,11 @@ const StaffDashboard = () => {
     }
   };
 
-  const activeOrders = orders.filter(o => !TERMINAL_STATES.includes(o.status));
-  const historyOrders = orders.filter(o => TERMINAL_STATES.includes(o.status));
+  const activeOrders = orders.filter((o: any) => !TERMINAL_STATES.includes(o.status));
+  const historyOrders = orders.filter((o: any) => TERMINAL_STATES.includes(o.status));
   
   const displayOrders = activeTab === 'ACTIVE' ? activeOrders : historyOrders;
+  const pagedOrders = displayOrders.slice(page * 10, (page + 1) * 10);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-6xl mx-auto space-y-6">
@@ -125,7 +132,7 @@ const StaffDashboard = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           <AnimatePresence>
-            {displayOrders.map(order => (
+            {pagedOrders.map((order: any) => (
               <motion.div 
                 key={order.id} layout
                 initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
@@ -180,6 +187,15 @@ const StaffDashboard = () => {
             </div>
           )}
         </div>
+      )}
+      {activeTab !== 'MENU' && (
+        <Pagination 
+          currentPage={page}
+          totalPages={Math.ceil(displayOrders.length / 10)}
+          totalElements={displayOrders.length}
+          size={10}
+          onPageChange={(p) => setPage(p)}
+        />
       )}
     </motion.div>
   );

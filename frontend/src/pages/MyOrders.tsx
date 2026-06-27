@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import api from '../services/api';
 import { Order } from '../types';
 import { Package, ChefHat, Truck, CheckCircle, XCircle, Star, X } from 'lucide-react';
+import Pagination from '../components/Pagination';
 
 const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -24,6 +25,9 @@ const Orders = () => {
       return new Set();
     }
   });
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
 
   const handleOpenReviewModal = (order: Order) => {
     setSelectedOrder(order);
@@ -74,15 +78,15 @@ const Orders = () => {
     }
   };
 
-  const fetchOrders = async (isInitial = false) => {
+  const fetchOrders = async (pageNumber: number, isInitial = false) => {
     try {
       if (isInitial) setLoading(true);
-      // Fetch orders page with a large size to get active and past history
-      const response = await api.get('/orders?size=50');
-      const fetchedOrders = response.data.data.content || response.data.data || [];
-      // Sort newest first based on ID to avoid timezone/clock skew issues
-      const sortedOrders = [...fetchedOrders].sort((a: Order, b: Order) => b.id - a.id);
-      setOrders(sortedOrders);
+      // Fetch orders page with size=10 and sorted descending by id (newest first)
+      const response = await api.get(`/orders?page=${pageNumber}&size=10&sort=id,desc`);
+      const pageData = response.data.data;
+      setOrders(pageData.content || pageData || []);
+      setTotalPages(pageData.totalPages || 0);
+      setTotalElements(pageData.totalElements || 0);
     } catch (err) {
       console.error('Failed to fetch orders:', err);
     } finally {
@@ -91,11 +95,11 @@ const Orders = () => {
   };
 
   useEffect(() => {
-    fetchOrders(true);
+    fetchOrders(page, true);
     // Poll for status updates every 10 seconds silently
-    const interval = setInterval(() => fetchOrders(false), 10000);
+    const interval = setInterval(() => fetchOrders(page, false), 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [page]);
 
   const getStatusStep = (status: string) => {
     switch (status) {
@@ -236,6 +240,14 @@ const Orders = () => {
               </motion.div>
             );
           })}
+          
+          <Pagination 
+            currentPage={page}
+            totalPages={totalPages}
+            totalElements={totalElements}
+            size={10}
+            onPageChange={(p) => setPage(p)}
+          />
         </div>
       )}
 
