@@ -10,7 +10,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   
   const [address, setAddress] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('CREDIT_CARD');
+  const [paymentMethod, setPaymentMethod] = useState('CASH_ON_DELIVERY');
   const [isProcessing, setIsProcessing] = useState(false);
   const [successOrder, setSuccessOrder] = useState(null);
   const [error, setError] = useState('');
@@ -77,28 +77,11 @@ const Checkout = () => {
             <h2 className="text-xl font-semibold text-white flex items-center gap-2 border-b border-dark-border pb-3">
               <CreditCard className="h-5 w-5 text-primary-500" /> Payment Method
             </h2>
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => setPaymentMethod('CREDIT_CARD')}
-                className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${
-                  paymentMethod === 'CREDIT_CARD' ? 'border-primary-500 bg-primary-900/20 text-white' : 'border-dark-border text-slate-400 hover:border-slate-500'
-                }`}
-              >
+            <div className="grid grid-cols-1 gap-4">
+              <div className="p-4 rounded-xl border-2 border-primary-500 bg-primary-900/20 text-white flex flex-col items-center gap-2 transition-all">
                 <CreditCard className="h-6 w-6" />
-                <span className="font-medium">Credit Card</span>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => setPaymentMethod('BKASH')}
-                className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${
-                  paymentMethod === 'BKASH' ? 'border-pink-500 bg-pink-900/20 text-white' : 'border-dark-border text-slate-400 hover:border-slate-500'
-                }`}
-              >
-                <Smartphone className="h-6 w-6" />
-                <span className="font-medium">bKash</span>
-              </button>
+                <span className="font-medium">Cash On Delivery</span>
+              </div>
             </div>
             {/* Strategy Pattern visual proof */}
             <p className="text-xs text-slate-500 mt-2 text-center">
@@ -137,7 +120,7 @@ const Checkout = () => {
               {isProcessing ? (
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
               ) : (
-                <>Pay ${cart.totalAmount.toFixed(2)}</>
+                <>Order ${cart.totalAmount.toFixed(2)}</>
               )}
             </button>
           </div>

@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { motion } from 'framer-motion';
-import { Store, MapPin, Phone, Star } from 'lucide-react';
+import { Store, MapPin, Phone, Star, Search } from 'lucide-react';
 
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const res = await api.get('/restaurants?size=20');
+        const query = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
+        const res = await api.get(`/restaurants?size=20${query}`);
         setRestaurants(res.data.data.content);
       } catch (err) {
         console.error("Failed to fetch restaurants", err);
@@ -19,8 +21,13 @@ const RestaurantList = () => {
         setLoading(false);
       }
     };
-    fetchRestaurants();
-  }, []);
+    
+    const timeoutId = setTimeout(() => {
+      fetchRestaurants();
+    }, 500);
+    
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
 
   if (loading) {
     return <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div></div>;
@@ -31,9 +38,23 @@ const RestaurantList = () => {
       initial={{ opacity: 0 }} animate={{ opacity: 1 }}
       className="space-y-8"
     >
-      <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Popular Restaurants</h1>
-        <p className="text-slate-400">Discover the best food around you.</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Popular Restaurants</h1>
+          <p className="text-slate-400">Discover the best food around you.</p>
+        </div>
+        <div className="relative max-w-md w-full">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-slate-500" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search for restaurants..."
+            className="input-field pl-10"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -83,9 +104,9 @@ const RestaurantList = () => {
           </motion.div>
         ))}
 
-        {restaurants.length === 0 && (
+        {restaurants.length === 0 && !loading && (
           <div className="col-span-full text-center py-12 text-slate-400 glass-panel">
-            No active restaurants found.
+            {searchTerm ? `No restaurants found matching "${searchTerm}".` : "No active restaurants found."}
           </div>
         )}
       </div>

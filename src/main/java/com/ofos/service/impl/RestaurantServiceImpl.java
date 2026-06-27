@@ -32,7 +32,11 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<RestaurantResponse> getAllRestaurants(Pageable pageable) {
+    public Page<RestaurantResponse> getAllRestaurants(String search, Pageable pageable) {
+        if (search != null && !search.trim().isEmpty()) {
+            return restaurantRepository.findByActiveTrueAndNameContainingIgnoreCase(search.trim(), pageable)
+                    .map(this::toResponse);
+        }
         return restaurantRepository.findByActiveTrue(pageable)
                 .map(this::toResponse);
     }

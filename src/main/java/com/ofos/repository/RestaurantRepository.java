@@ -12,6 +12,8 @@ import java.util.List;
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
     Page<Restaurant> findByActiveTrue(Pageable pageable);
+    
+    Page<Restaurant> findByActiveTrueAndNameContainingIgnoreCase(String name, Pageable pageable);
 
     List<Restaurant> findByOwnerId(Long ownerId);
 }

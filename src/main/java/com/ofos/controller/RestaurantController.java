@@ -35,8 +35,10 @@ public class RestaurantController {
 
     @GetMapping
     @Operation(summary = "List all active restaurants")
-    public ResponseEntity<ApiResponse<Page<RestaurantResponse>>> getAllRestaurants(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(restaurantService.getAllRestaurants(pageable)));
+    public ResponseEntity<ApiResponse<Page<RestaurantResponse>>> getAllRestaurants(
+            @RequestParam(required = false) String search,
+            Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(restaurantService.getAllRestaurants(search, pageable)));
     }
 
     @GetMapping("/{id}")
