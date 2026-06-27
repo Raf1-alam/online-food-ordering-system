@@ -6,5 +6,7 @@ package com.ofos.model.enums;
  * no changes to existing code (Open/Closed Principle).
  */
 public enum PaymentMethod {
-    CASH_ON_DELIVERY
+    CASH_ON_DELIVERY,
+    BKASH,
+    CREDIT_CARD
 }

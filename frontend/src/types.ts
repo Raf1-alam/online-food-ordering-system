@@ -45,19 +45,30 @@ export interface Cart {
 
 export interface OrderItem {
   id: number;
-  orderId: number;
-  menuItem: MenuItem;
+  itemName: string;
+  itemPrice: number;
   quantity: number;
-  priceAtOrder: number;
+  lineTotal: number;
+}
+
+export interface PaymentInfo {
+  method: string;
+  status: string;
+  transactionRef: string;
+  paidAt?: string;
 }
 
 export interface Order {
   id: number;
   userId: number;
+  customerName?: string;
   restaurantId: number;
+  restaurantName: string;
   status: 'PLACED' | 'CONFIRMED' | 'PREPARING' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'CANCELLED';
   totalAmount: number;
   deliveryAddress: string;
   items: OrderItem[];
+  payment?: PaymentInfo;
   createdAt: string;
+  updatedAt: string;
 }
