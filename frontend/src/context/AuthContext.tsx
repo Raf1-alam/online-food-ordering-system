@@ -8,14 +8,11 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if token exists on initial load
+    // Check if token exists on initial load and refresh the user from the
+    // backend so we always have a real userId (avoids stale localStorage state
+    // where userId may be missing, breaking owner-based queries).
     const token = localStorage.getItem(TOKEN_KEY);
     if (token) {
-      // In a real app, you might want to fetch user profile here
-      // For now, we decode JWT or just assume authenticated if token exists
-      // The backend will validate it anyway on requests
-      
-      // Temporary hack: Extract role from token payload if possible, or store user object in LS
       const storedUser = localStorage.getItem('ofos_user');
       if (storedUser) {
         try {
@@ -24,8 +21,30 @@ export const AuthProvider = ({ children }) => {
           console.error("Failed to parse user from local storage", e);
         }
       }
+
+      // Refresh profile in the background to get the authoritative userId/role
+      api.get('/users/profile')
+        .then(res => {
+          const profile = res.data?.data;
+          if (profile) {
+            const userObj = {
+              userId: profile.id,
+              fullName: profile.fullName,
+              email: profile.email,
+              phone: profile.phone,
+              role: profile.role,
+            };
+            localStorage.setItem('ofos_user', JSON.stringify(userObj));
+            setUser(userObj);
+          }
+        })
+        .catch(err => {
+          console.warn("Profile refresh failed; using cached user if any", err);
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const login = async (email, password) => {

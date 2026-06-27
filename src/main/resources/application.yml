@@ -17,7 +17,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: validate  # Flyway manages schema — never use 'update' in production
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
@@ -42,8 +42,8 @@ spring:
 app:
   jwt:
     secret: ${JWT_SECRET:default-dev-secret-change-in-production-min-256-bit-key-required-here}
-    access-token-expiration-ms: 1800000    # 30 minutes
-    refresh-token-expiration-ms: 604800000 # 7 days
+    access-token-expiration-ms: 1800000
+    refresh-token-expiration-ms: 604800000
 
 # ==============================================================
 # API Documentation
