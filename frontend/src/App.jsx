@@ -18,6 +18,8 @@ import StaffDashboard from './pages/StaffDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import RestaurantList from './pages/RestaurantList';
 import RestaurantApplication from './pages/RestaurantApplication';
+import Profile from './pages/Profile';
+import MyOrders from './pages/MyOrders';
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const { user, loading } = useAuth();
@@ -60,6 +62,16 @@ const App = () => {
                 <Route path="/apply-partner" element={
                   <ProtectedRoute allowedRoles={['CUSTOMER']}>
                     <RestaurantApplication />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/orders" element={
+                  <ProtectedRoute allowedRoles={['CUSTOMER']}>
+                    <MyOrders />
                   </ProtectedRoute>
                 } />
                 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
 import { motion } from 'framer-motion';
@@ -158,7 +158,7 @@ const SuccessView = ({ order }) => (
       <div className="flex justify-between mb-2"><span className="text-slate-400">Transaction Ref:</span> <span className="text-white font-mono text-sm">{order.payment.transactionRef}</span></div>
       <div className="flex justify-between border-t border-dark-border pt-2 mt-2"><span className="font-medium text-slate-300">Total:</span> <span className="text-emerald-400 font-bold">${order.totalAmount.toFixed(2)}</span></div>
     </div>
-    <a href="/orders" className="btn-primary">View My Orders</a>
+    <Link to="/orders" className="btn-primary inline-block">View My Orders</Link>
   </motion.div>
 );
 

@@ -46,11 +46,18 @@ const RestaurantList = () => {
           >
             <Link to={`/restaurants/${restaurant.id}/menu`} className="block h-full">
               <div className="glass-panel overflow-hidden h-full group hover:border-primary-500/50 transition-colors">
-                <div className="h-48 bg-dark-border relative">
-                  {/* Placeholder for restaurant image */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-dark-card to-slate-800 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
-                    <Store className="h-16 w-16 text-slate-600" />
-                  </div>
+                <div className="h-48 bg-dark-border relative overflow-hidden">
+                  {restaurant.imageUrl ? (
+                    <img 
+                      src={restaurant.imageUrl} 
+                      alt={restaurant.name} 
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-tr from-dark-card to-slate-800 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                      <Store className="h-16 w-16 text-slate-600" />
+                    </div>
+                  )}
                   <div className="absolute top-3 right-3 bg-dark/80 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1 text-sm text-amber-400 font-medium">
                     <Star className="h-4 w-4 fill-current" /> 4.8
                   </div>

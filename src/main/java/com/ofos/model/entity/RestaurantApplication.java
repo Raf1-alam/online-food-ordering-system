@@ -34,8 +34,11 @@ public class RestaurantApplication {
     @Column(nullable = false, length = 20)
     private String phone;
 
-    @Column(length = 500)
+    @Column(name = "business_license_url", length = 500)
     private String businessLicenseUrl;
+
+    @Column(name = "restaurant_image_url", length = 500)
+    private String restaurantImageUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

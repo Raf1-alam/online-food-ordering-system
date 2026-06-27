@@ -79,8 +79,16 @@ const Menu = () => {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
       
       {/* Restaurant Header */}
-      <div className="glass-panel p-8 relative overflow-hidden rounded-3xl">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-900/40 to-transparent pointer-events-none"></div>
+      <div className="glass-panel p-8 relative overflow-hidden rounded-3xl min-h-[300px] flex flex-col justify-end">
+        {restaurant?.imageUrl && (
+          <img 
+            src={restaurant.imageUrl} 
+            alt={restaurant.name} 
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/60 to-transparent pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-900/40 to-transparent pointer-events-none mix-blend-overlay"></div>
         <div className="relative z-10">
           <h1 className="text-4xl font-bold text-white mb-2">{restaurant?.name}</h1>
           <p className="text-lg text-slate-300 max-w-2xl">{restaurant?.description}</p>
@@ -123,10 +131,21 @@ const Menu = () => {
                   transition={{ delay: (catIdx * 0.1) + (idx * 0.05) }}
                   className="glass-panel p-4 flex justify-between hover:border-primary-500/30 transition-colors group"
                 >
-                  <div className="pr-4 flex-1">
-                    <h3 className="text-lg font-semibold text-white group-hover:text-primary-400 transition-colors">{item.name}</h3>
-                    <p className="text-sm text-slate-400 mt-1 line-clamp-2">{item.description}</p>
-                    <div className="font-bold text-emerald-400 mt-2">${item.price.toFixed(2)}</div>
+                  <div className="flex-1 flex gap-4 pr-4">
+                    {item.imageUrl && (
+                      <div className="shrink-0 w-24 h-24 rounded-lg overflow-hidden border border-dark-border/50">
+                        <img 
+                          src={item.imageUrl} 
+                          alt={item.name} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="text-lg font-semibold text-white group-hover:text-primary-400 transition-colors">{item.name}</h3>
+                      <p className="text-sm text-slate-400 mt-1 line-clamp-2">{item.description}</p>
+                      <div className="font-bold text-emerald-400 mt-2">${item.price.toFixed(2)}</div>
+                    </div>
                   </div>
                   
                   <div className="flex flex-col justify-end">

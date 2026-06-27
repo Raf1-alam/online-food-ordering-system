@@ -27,4 +27,7 @@ public class ApplicationRequest {
 
     @Size(max = 500, message = "License URL must not exceed 500 characters")
     private String businessLicenseUrl;
+
+    @Size(max = 500, message = "Restaurant Image URL must not exceed 500 characters")
+    private String restaurantImageUrl;
 }

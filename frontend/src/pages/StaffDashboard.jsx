@@ -14,14 +14,12 @@ const StaffDashboard = () => {
   const [activeTab, setActiveTab] = useState('ACTIVE'); // ACTIVE, HISTORY, MENU
   const { user } = useAuth();
   
-  // Hardcoded for demo if staff doesn't have a specific restaurant in context. 
-  // In a real app, staff would select their restaurant or we'd fetch it from their profile.
-  const restaurantId = 1; 
+  const [restaurantId, setRestaurantId] = useState(null);
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (restId) => {
     try {
       setLoading(true);
-      const res = await api.get(`/restaurant-staff/orders/restaurant/${restaurantId}?size=50`);
+      const res = await api.get(`/restaurant-staff/orders/restaurant/${restId}?size=50`);
       setOrders(res.data.data.content);
     } catch (err) {
       console.error("Failed to fetch orders", err);
@@ -31,11 +29,32 @@ const StaffDashboard = () => {
   };
 
   useEffect(() => {
-    fetchOrders();
-    // Poll every 15 seconds for new orders
-    const interval = setInterval(fetchOrders, 15000);
-    return () => clearInterval(interval);
-  }, []);
+    let interval;
+    const initializeStaff = async () => {
+      try {
+        if (!user || !user.userId) return;
+        
+        // Find staff's restaurant
+        const res = await api.get('/restaurants?size=100');
+        const myRestaurant = res.data.data.content.find(r => r.ownerId === user.userId);
+        
+        if (myRestaurant) {
+          setRestaurantId(myRestaurant.id);
+          await fetchOrders(myRestaurant.id);
+          interval = setInterval(() => fetchOrders(myRestaurant.id), 15000);
+        } else {
+          setLoading(false);
+          console.warn("No restaurant found for this staff member");
+        }
+      } catch (err) {
+        console.error("Failed to initialize staff dashboard", err);
+        setLoading(false);
+      }
+    };
+    
+    initializeStaff();
+    return () => { if (interval) clearInterval(interval); };
+  }, [user]);
 
   const handleAdvanceStatus = async (orderId, currentStatus) => {
     const currentIndex = ORDER_STATES.indexOf(currentStatus);

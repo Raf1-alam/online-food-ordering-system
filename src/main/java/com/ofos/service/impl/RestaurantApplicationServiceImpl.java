@@ -47,6 +47,7 @@ public class RestaurantApplicationServiceImpl implements RestaurantApplicationSe
                 .address(request.getAddress())
                 .phone(request.getPhone())
                 .businessLicenseUrl(request.getBusinessLicenseUrl())
+                .restaurantImageUrl(request.getRestaurantImageUrl())
                 .status(ApplicationStatus.PENDING)
                 .build();
 
@@ -90,6 +91,7 @@ public class RestaurantApplicationServiceImpl implements RestaurantApplicationSe
                 .name(app.getRestaurantName())
                 .address(app.getAddress())
                 .phone(app.getPhone())
+                .imageUrl(app.getRestaurantImageUrl())
                 .ownerId(user.getId())
                 .build();
 
@@ -126,6 +128,7 @@ public class RestaurantApplicationServiceImpl implements RestaurantApplicationSe
                 .address(app.getAddress())
                 .phone(app.getPhone())
                 .businessLicenseUrl(app.getBusinessLicenseUrl())
+                .restaurantImageUrl(app.getRestaurantImageUrl())
                 .status(app.getStatus())
                 .adminNotes(app.getAdminNotes())
                 .createdAt(app.getCreatedAt())

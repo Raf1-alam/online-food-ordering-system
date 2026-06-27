@@ -14,7 +14,8 @@ const RestaurantApplication = () => {
     restaurantName: '',
     address: '',
     phone: '',
-    businessLicenseUrl: ''
+    businessLicenseUrl: '',
+    restaurantImageUrl: ''
   });
 
   useEffect(() => {
@@ -154,6 +155,17 @@ const RestaurantApplication = () => {
                 value={formData.businessLicenseUrl} onChange={handleChange}
               />
               <p className="text-xs text-slate-500 mt-1">Please provide a link to your business registration or license.</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Restaurant Cover Image URL</label>
+              <input
+                type="text" name="restaurantImageUrl"
+                className="w-full bg-dark border border-dark-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary-500 transition-colors"
+                placeholder="https://images.unsplash.com/... (optional)"
+                value={formData.restaurantImageUrl} onChange={handleChange}
+              />
+              <p className="text-xs text-slate-500 mt-1">Provide a high-quality cover photo for your restaurant profile.</p>
             </div>
           </div>
 

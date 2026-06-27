@@ -27,6 +27,9 @@ public class RestaurantRequest {
     @Size(max = 20, message = "Phone must not exceed 20 characters")
     private String phone;
 
+    @Size(max = 500, message = "Image URL must not exceed 500 characters")
+    private String imageUrl;
+
     /** Owner user ID — required when admin creates a restaurant */
     private Long ownerId;
 }

@@ -21,6 +21,7 @@ public class ApplicationResponse {
     private String address;
     private String phone;
     private String businessLicenseUrl;
+    private String restaurantImageUrl;
     private ApplicationStatus status;
     private String adminNotes;
     private LocalDateTime createdAt;

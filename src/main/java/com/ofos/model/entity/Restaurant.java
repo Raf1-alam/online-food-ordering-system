@@ -38,6 +38,9 @@ public class Restaurant {
     @Column(length = 20)
     private String phone;
 
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
     /**
      * The staff user who owns/manages this restaurant.
      * Used for ownership-based access control (IDOR prevention).

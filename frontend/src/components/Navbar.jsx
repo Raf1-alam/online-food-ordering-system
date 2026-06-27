@@ -2,14 +2,28 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../context/CartContext';
-import { Utensils, ShoppingCart, User as UserIcon, LogOut, LayoutDashboard } from 'lucide-react';
+import { Utensils, ShoppingCart, User as UserIcon, LogOut, LayoutDashboard, ChevronDown, ListOrdered } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 
 const Navbar = ({ onCartClick }) => {
   const { user, logout } = useAuth();
   const { cart } = useCart();
   const navigate = useNavigate();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
+    setIsDropdownOpen(false);
     logout();
     navigate('/login');
   };
@@ -53,19 +67,52 @@ const Navbar = ({ onCartClick }) => {
                   </Link>
               )}
 
-              {/* User Dropdown / Profile (Simplified) */}
-              <div className="flex items-center space-x-4 border-l border-dark-border pl-4">
-                <div className="flex items-center space-x-2 text-sm text-slate-300">
+              {/* User Dropdown */}
+              <div className="relative border-l border-dark-border pl-4" ref={dropdownRef}>
+                <button 
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center space-x-2 text-sm text-slate-300 hover:text-white transition-colors focus:outline-none"
+                >
                   <UserIcon className="h-5 w-5" />
                   <span>{user.fullName}</span>
-                </div>
-                <button 
-                  onClick={handleLogout}
-                  className="text-slate-400 hover:text-primary-500 transition-colors"
-                  title="Logout"
-                >
-                  <LogOut className="h-5 w-5" />
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
+                
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-3 w-48 bg-dark border border-dark-border rounded-xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                    <div className="px-4 py-2 border-b border-dark-border mb-1">
+                      <p className="text-sm font-semibold text-white truncate">{user.fullName}</p>
+                      <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                    </div>
+                    
+                    <Link 
+                      to="/profile" 
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="flex items-center px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-dark-border/50 transition-colors"
+                    >
+                      <UserIcon className="h-4 w-4 mr-2" /> Profile
+                    </Link>
+                    
+                    {user.role === 'CUSTOMER' && (
+                      <Link 
+                        to="/orders" 
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex items-center px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-dark-border/50 transition-colors"
+                      >
+                        <ListOrdered className="h-4 w-4 mr-2" /> My Orders
+                      </Link>
+                    )}
+
+                    <div className="border-t border-dark-border mt-1 pt-1">
+                      <button 
+                        onClick={handleLogout}
+                        className="w-full flex items-center px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-colors"
+                      >
+                        <LogOut className="h-4 w-4 mr-2" /> Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           ) : (

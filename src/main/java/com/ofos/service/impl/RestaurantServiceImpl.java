@@ -61,6 +61,7 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .description(request.getDescription())
                 .address(request.getAddress())
                 .phone(request.getPhone())
+                .imageUrl(request.getImageUrl())
                 .owner(owner)
                 .active(true)
                 .build();
@@ -88,6 +89,9 @@ public class RestaurantServiceImpl implements RestaurantService {
         restaurant.setDescription(request.getDescription());
         restaurant.setAddress(request.getAddress());
         restaurant.setPhone(request.getPhone());
+        if (request.getImageUrl() != null) {
+            restaurant.setImageUrl(request.getImageUrl());
+        }
 
         restaurant = restaurantRepository.save(restaurant);
         log.info("Restaurant updated: {} by user {}", restaurant.getName(), currentUser.getEmail());
@@ -103,6 +107,7 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .description(restaurant.getDescription())
                 .address(restaurant.getAddress())
                 .phone(restaurant.getPhone())
+                .imageUrl(restaurant.getImageUrl())
                 .ownerId(restaurant.getOwner().getId())
                 .ownerName(restaurant.getOwner().getFullName())
                 .active(restaurant.isActive())

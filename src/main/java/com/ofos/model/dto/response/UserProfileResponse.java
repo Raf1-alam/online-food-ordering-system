@@ -4,24 +4,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import com.ofos.model.enums.Role;
 import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RestaurantResponse {
-
+public class UserProfileResponse {
     private Long id;
-    private String name;
-    private String description;
-    private String address;
+    private String fullName;
+    private String email;
     private String phone;
-    private String imageUrl;
-    private Long ownerId;
-    private String ownerName;
-    private boolean active;
-    private int menuItemCount;
+    private Role role;
     private LocalDateTime createdAt;
 }
