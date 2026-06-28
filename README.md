@@ -12,6 +12,8 @@ A production-ready, industry-grade Online Food Ordering System built with a robu
   - **Strategy Pattern**: Dynamically selects between `CreditCardPaymentStrategy` and `BkashPaymentStrategy` for seamless checkout processing.
   - **Factory Pattern**: Generates immutable price snapshots (`OrderItem`) at the exact moment of checkout.
 - **Security First**: Comprehensive IDOR (Insecure Direct Object Reference) protection ensuring staff can only modify their own menus, and customers can only view their own orders.
+- **Comprehensive User Features**: Fully functional Cart (with quantity editing), One-Click Reorders, Saved Address Books, and a Forgot/Reset Password flow.
+- **Robust Order Management**: Dynamic Menu Categories, Restaurant Operating Hours (Open/Closed), and automated Email Notifications (Order Confirmations & Status Updates).
 - **Premium Frontend Aesthetics**: Built with Vite, React, Tailwind CSS (Dark Mode default), and Framer Motion for buttery-smooth glassmorphism UI interactions.
 
 ## 🏗️ Tech Stack
@@ -48,6 +50,9 @@ First, ensure you have a MySQL database running, or simply let the application s
 mvn clean install
 
 # Run the Spring Boot application (Default profile will attempt to connect to MySQL on localhost:3306)
+# Make sure to set your SMTP credentials in your environment before running
+$env:SMTP_USERNAME="your_email@gmail.com"
+$env:SMTP_PASSWORD="your_app_password"
 mvn spring-boot:run
 ```
 

@@ -24,6 +24,7 @@ public class RestaurantResponse {
     private String closingTime;
     @JsonProperty("isCurrentlyOpen")
     private boolean isCurrentlyOpen;
+    private Double rating;
     private Long ownerId;
     private String ownerName;
     private boolean active;

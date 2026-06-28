@@ -123,6 +123,7 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .openingTime(restaurant.getOpeningTime())
                 .closingTime(restaurant.getClosingTime())
                 .isCurrentlyOpen(restaurant.isCurrentlyOpen())
+                .rating(restaurant.getRating() != null ? Math.round(restaurant.getRating() * 10.0) / 10.0 : 0.0)
                 .ownerId(restaurant.getOwner().getId())
                 .ownerName(restaurant.getOwner().getFullName())
                 .active(restaurant.isActive())

@@ -159,7 +159,7 @@ const RestaurantList = () => {
                   {/* Rating Badge */}
                   <div className="absolute top-4 left-4 bg-dark/80 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-dark-border shadow-lg">
                     <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                    <span className="text-sm font-bold text-white">{restaurant.rating || '4.5'}</span>
+                    <span className="text-sm font-bold text-white">{restaurant.rating > 0 ? Number(restaurant.rating).toFixed(1) : 'New'}</span>
                   </div>
                   
                   {/* Favorite Button */}
