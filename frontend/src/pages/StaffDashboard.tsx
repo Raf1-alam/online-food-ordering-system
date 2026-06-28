@@ -12,20 +12,21 @@ const TERMINAL_STATES = ['DELIVERED', 'CANCELLED'];
 const StaffDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('ACTIVE'); // ACTIVE, HISTORY, MENU, SETTINGS
+  const [activeTab, setActiveTab] = useState('ACTIVE');
   const [page, setPage] = useState(0);
   const { user } = useAuth();
 
   const [restaurantId, setRestaurantId] = useState(null);
   const [restaurant, setRestaurant] = useState(null);
 
-  // Settings form state
   const [settingsForm, setSettingsForm] = useState({
     name: '',
     description: '',
     address: '',
     phone: '',
     imageUrl: '',
+    openingTime: '09:00',
+    closingTime: '22:00',
   });
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [settingsSuccess, setSettingsSuccess] = useState('');
@@ -61,6 +62,8 @@ const StaffDashboard = () => {
             address: myRestaurant.address || '',
             phone: myRestaurant.phone || '',
             imageUrl: myRestaurant.imageUrl || '',
+            openingTime: myRestaurant.openingTime || '09:00',
+            closingTime: myRestaurant.closingTime || '22:00',
           });
           await fetchOrders(myRestaurant.id);
           interval = setInterval(() => fetchOrders(myRestaurant.id), 15000);
@@ -116,6 +119,7 @@ const StaffDashboard = () => {
       setTimeout(() => setSettingsSuccess(''), 3000);
     } catch (err) {
       setSettingsError(err.response?.data?.message || 'Failed to save changes.');
+      setTimeout(() => setSettingsError(''), 4000);
     } finally {
       setSettingsSaving(false);
     }
@@ -141,6 +145,35 @@ const StaffDashboard = () => {
 
   return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-6xl mx-auto space-y-6">
+
+        {/* Toast Notifications */}
+        <AnimatePresence>
+          {settingsSuccess && (
+            <motion.div
+              key="settings-success-toast"
+              initial={{ opacity: 0, x: 80 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 80 }}
+              className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 bg-emerald-900/90 border border-emerald-500/50 rounded-xl text-emerald-200 text-sm shadow-2xl backdrop-blur-md"
+            >
+              <CheckCircle className="h-5 w-5 shrink-0" />
+              {settingsSuccess}
+            </motion.div>
+          )}
+          {settingsError && (
+            <motion.div
+              key="settings-error-toast"
+              initial={{ opacity: 0, x: 80 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 80 }}
+              className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 bg-red-900/90 border border-red-500/50 rounded-xl text-red-200 text-sm shadow-2xl backdrop-blur-md"
+            >
+              <XCircle className="h-5 w-5 shrink-0" />
+              {settingsError}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="flex justify-between items-end">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Staff Kitchen Display</h1>
@@ -197,22 +230,9 @@ const StaffDashboard = () => {
                 </div>
               </div>
 
-              {settingsSuccess && (
-                  <div className="mb-6 p-4 bg-emerald-900/30 border border-emerald-500/50 rounded-xl text-emerald-200 text-sm flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 shrink-0" />
-                    {settingsSuccess}
-                  </div>
-              )}
-
-              {settingsError && (
-                  <div className="mb-6 p-4 bg-red-900/30 border border-red-500/50 rounded-xl text-red-200 text-sm flex items-center gap-2">
-                    <XCircle className="h-4 w-4 shrink-0" />
-                    {settingsError}
-                  </div>
-              )}
-
               <form onSubmit={handleSettingsSave} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                   {/* Restaurant Name */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -289,6 +309,35 @@ const StaffDashboard = () => {
                         className="input-field"
                     />
                   </div>
+
+                  {/* Opening Time */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Opening Time
+                    </label>
+                    <input
+                        type="time"
+                        name="openingTime"
+                        value={settingsForm.openingTime}
+                        onChange={handleSettingsChange}
+                        className="input-field"
+                    />
+                  </div>
+
+                  {/* Closing Time */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Closing Time
+                    </label>
+                    <input
+                        type="time"
+                        name="closingTime"
+                        value={settingsForm.closingTime}
+                        onChange={handleSettingsChange}
+                        className="input-field"
+                    />
+                  </div>
+
                 </div>
 
                 {/* Image Preview */}
