@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Star, MapPin, Search } from 'lucide-react';
+import { Star, MapPin, Search, Clock } from 'lucide-react';
 import api from '../services/api';
 import { Restaurant } from '../types';
-import { useAuth } from '../hooks/useAuth';
 
 const RestaurantList = () => {
-  const { user } = useAuth();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,13 +35,13 @@ const RestaurantList = () => {
     };
 
     fetchRestaurants();
-    if (user) {
+    if (localStorage.getItem('ofos_token')) {
       fetchFavorites();
     }
-  }, [user]);
+  }, []);
 
   const toggleFavorite = async (id: number) => {
-    if (!user) {
+    if (!localStorage.getItem('ofos_token')) {
       alert('Please log in to save favorites.');
       return;
     }
@@ -58,6 +56,15 @@ const RestaurantList = () => {
     } catch (error) {
       console.error('Failed to toggle favorite:', error);
     }
+  };
+
+  const formatTime = (time?: string) => {
+    if (!time) return null;
+    const [hourStr, minute] = time.split(':');
+    let hour = parseInt(hourStr, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12 || 12;
+    return `${hour}:${minute} ${ampm}`;
   };
 
   const filteredRestaurants = restaurants
@@ -172,6 +179,15 @@ const RestaurantList = () => {
                     <MapPin className="w-4 h-4 text-primary-500" />
                     <span className="truncate">{restaurant.address || 'Local Delivery Area'}</span>
                   </div>
+
+                  {(restaurant.openingTime || restaurant.closingTime) && (
+                    <div className="flex items-center gap-2 text-slate-400 text-sm mt-2">
+                      <Clock className="w-4 h-4 text-primary-500" />
+                      <span>
+                        {formatTime(restaurant.openingTime)} – {formatTime(restaurant.closingTime)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </Link>
             </motion.div>
