@@ -171,6 +171,12 @@ public class OrderServiceImpl implements OrderService {
             currentState = currentState.next(order);
         }
 
+        // ETA: staff provides this (typically when confirming the order) so the
+        // customer knows when to expect delivery. Only overwrite when supplied.
+        if (request.getEstimatedDeliveryTime() != null) {
+            order.setEstimatedDeliveryTime(request.getEstimatedDeliveryTime());
+        }
+
         order = orderRepository.save(order);
         log.info("Order #{} status updated to {} by staff {}", order.getId(), order.getStatus(), staff.getEmail());
 
@@ -250,6 +256,7 @@ public class OrderServiceImpl implements OrderService {
                 .couponCode(order.getCoupon() != null ? order.getCoupon().getCode() : null)
                 .status(order.getStatus())
                 .deliveryAddress(order.getDeliveryAddress())
+                .estimatedDeliveryTime(order.getEstimatedDeliveryTime())
                 .payment(paymentInfo)
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
