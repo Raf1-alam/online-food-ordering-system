@@ -65,6 +65,13 @@ public class Order {
     private String deliveryAddress;
 
     /**
+     * Estimated delivery time, set by restaurant staff when confirming the order.
+     * Displayed to customers on the Orders page so they know when to expect delivery.
+     */
+    @Column(name = "estimated_delivery_time")
+    private LocalDateTime estimatedDeliveryTime;
+
+    /**
      * Optimistic locking — prevents concurrent status updates from corrupting data.
      * Satisfies the "50 concurrent users" requirement.
      */
