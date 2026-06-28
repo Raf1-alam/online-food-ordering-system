@@ -97,6 +97,20 @@ public class OrderServiceImpl implements OrderService {
             order.setTotalAmount(finalTotal);
         }
 
+        // Auto-calculate ETA
+        int maxPrepTime = cart.getItems().stream()
+                .mapToInt(item -> item.getMenuItem().getPreparationTimeMinutes() != null ? item.getMenuItem().getPreparationTimeMinutes() : 20)
+                .max().orElse(20);
+
+        int deliveryTime = 30; // fallback
+        if (customer.getLatitude() != null && customer.getLongitude() != null &&
+            restaurant.getLatitude() != null && restaurant.getLongitude() != null) {
+            double distance = calculateDistance(customer.getLatitude(), customer.getLongitude(), restaurant.getLatitude(), restaurant.getLongitude());
+            deliveryTime = (int) Math.round((distance * 3) + 5);
+        }
+
+        order.setEstimatedDeliveryTime(java.time.LocalDateTime.now().plusMinutes(maxPrepTime + deliveryTime));
+
         order = orderRepository.save(order);
 
         // 2. Strategy Pattern: process payment based on selected method
@@ -184,18 +198,14 @@ public class OrderServiceImpl implements OrderService {
             currentState = currentState.next(order);
         }
 
-        // ETA: staff provides this (typically when confirming the order) so the
-        // customer knows when to expect delivery. Only overwrite when supplied.
-        if (request.getEstimatedDeliveryTime() != null) {
-            order.setEstimatedDeliveryTime(request.getEstimatedDeliveryTime());
-        }
+        // ETA is now calculated at order placement automatically.
 
         order = orderRepository.save(order);
         log.info("Order #{} status updated to {} by staff {}", order.getId(), order.getStatus(), staff.getEmail());
 
         String statusText = "Your order #" + order.getId() + " status has been updated to: " + order.getStatus();
-        if (request.getEstimatedDeliveryTime() != null) {
-            statusText += "\nEstimated delivery time: " + request.getEstimatedDeliveryTime();
+        if (order.getEstimatedDeliveryTime() != null) {
+            statusText += "\nEstimated delivery time: " + order.getEstimatedDeliveryTime();
         }
         emailService.sendEmail(order.getUser().getEmail(), 
             "Order Status Update - #" + order.getId(), 
@@ -317,5 +327,17 @@ public class OrderServiceImpl implements OrderService {
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .build();
+    }
+
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        // Haversine formula
+        final int R = 6371; // Radius of the earth in km
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 }

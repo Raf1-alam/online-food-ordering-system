@@ -17,11 +17,4 @@ public class OrderStatusUpdateRequest {
 
     @NotNull(message = "Target status is required")
     private OrderStatus status;
-
-    /**
-     * Optional. Staff sets this when confirming an order (status -> CONFIRMED)
-     * so the customer knows when to expect delivery. Ignored for other transitions
-     * unless explicitly provided.
-     */
-    private LocalDateTime estimatedDeliveryTime;
 }

@@ -49,6 +49,10 @@ public class MenuItem {
     @Column(length = 500)
     private String imageUrl;
 
+    @Column(name = "preparation_time_minutes", nullable = false)
+    @Builder.Default
+    private Integer preparationTimeMinutes = 20;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;

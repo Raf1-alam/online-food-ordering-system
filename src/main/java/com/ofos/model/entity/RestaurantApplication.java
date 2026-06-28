@@ -40,6 +40,12 @@ public class RestaurantApplication {
     @Column(name = "restaurant_image_url", length = 500)
     private String restaurantImageUrl;
 
+    @Column(columnDefinition = "DECIMAL(10, 7)")
+    private Double latitude;
+
+    @Column(columnDefinition = "DECIMAL(10, 7)")
+    private Double longitude;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private ApplicationStatus status;

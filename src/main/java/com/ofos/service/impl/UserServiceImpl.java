@@ -46,6 +46,13 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setPhone(request.getPhone());
+        
+        if (request.getLatitude() != null) {
+            user.setLatitude(request.getLatitude());
+        }
+        if (request.getLongitude() != null) {
+            user.setLongitude(request.getLongitude());
+        }
 
         // Update password if requested
         if (request.getNewPassword() != null && !request.getNewPassword().isEmpty()) {
@@ -68,6 +75,8 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .role(user.getRole())
+                .latitude(user.getLatitude())
+                .longitude(user.getLongitude())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

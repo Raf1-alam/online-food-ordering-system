@@ -127,6 +127,8 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .role(user.getRole())
+                .latitude(user.getLatitude())
+                .longitude(user.getLongitude())
                 .build();
     }
 
@@ -203,6 +205,8 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .role(user.getRole())
+                .latitude(user.getLatitude())
+                .longitude(user.getLongitude())
                 .build();
     }
 

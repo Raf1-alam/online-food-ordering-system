@@ -19,6 +19,9 @@ export interface Restaurant {
   openingTime?: string;
   closingTime?: string;
   isCurrentlyOpen?: boolean;
+  distance?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface MenuItem {

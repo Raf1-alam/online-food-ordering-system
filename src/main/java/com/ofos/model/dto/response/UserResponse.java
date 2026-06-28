@@ -20,5 +20,7 @@ public class UserResponse {
     private String phone;
     private Role role;
     private boolean active;
+    private Double latitude;
+    private Double longitude;
     private LocalDateTime createdAt;
 }

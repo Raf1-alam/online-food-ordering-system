@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
  */
 public interface RestaurantService {
 
-    Page<RestaurantResponse> getAllRestaurants(String search, Pageable pageable);
+    Page<RestaurantResponse> getAllRestaurants(String search, Double lat, Double lng, Pageable pageable);
 
     RestaurantResponse getRestaurantById(Long id);
 

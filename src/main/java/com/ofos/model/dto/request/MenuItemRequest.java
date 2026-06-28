@@ -33,4 +33,8 @@ public class MenuItemRequest {
 
     @Size(max = 500, message = "Image URL must not exceed 500 characters")
     private String imageUrl;
+
+    @NotNull(message = "Preparation time is required")
+    @Min(value = 1, message = "Preparation time must be at least 1 minute")
+    private Integer preparationTimeMinutes;
 }

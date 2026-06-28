@@ -48,6 +48,12 @@ public class User {
     @Builder.Default
     private boolean active = true;
 
+    @Column(columnDefinition = "DECIMAL(10, 7)")
+    private Double latitude;
+
+    @Column(columnDefinition = "DECIMAL(10, 7)")
+    private Double longitude;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "user_favorites",

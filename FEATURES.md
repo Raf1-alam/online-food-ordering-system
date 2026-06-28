@@ -37,4 +37,12 @@ This document outlines the core and extended features of the Online Food Orderin
 
 ### 5. Advanced Frontend Search & Filters
 - Real-time search by restaurant name, description, or category.
-- Ability to sort restaurants by Highest Rated or Name instantly without backend calls.
+- Ability to sort restaurants by Highest Rated, Nearest, or Name instantly.
+
+### 6. GPS Location & Proximity-Based Filtering
+- **No-Cost Mapping:** Integrated Leaflet.js and OpenStreetMap (no paid API keys required).
+- **Interactive Map Picker:** Customers and restaurants can pin their coordinates visually.
+- **One-Touch Geolocation:** Added a "Use Current Location" button leveraging the browser Geolocation API.
+- **Proximity Filtering:** Automatically filters the homepage restaurant list to only display spots within a 10km radius of the customer's coordinates.
+- **Dynamic Delivery ETAs:** Auto-calculates delivery times dynamically using the Haversine distance formula `(distance * 3 min) + item preparation time`, eliminating manual kitchen entry.
+

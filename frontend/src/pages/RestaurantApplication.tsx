@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { motion } from 'framer-motion';
-import { Store, Send, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Store, Send, CheckCircle, Clock, XCircle, MapPin } from 'lucide-react';
+import { MapPicker } from '../components/MapPicker';
 
 const RestaurantApplication = () => {
   const [application, setApplication] = useState(null);
@@ -15,7 +16,9 @@ const RestaurantApplication = () => {
     address: '',
     phone: '',
     businessLicenseUrl: '',
-    restaurantImageUrl: ''
+    restaurantImageUrl: '',
+    latitude: null as number | null,
+    longitude: null as number | null
   });
 
   useEffect(() => {
@@ -144,6 +147,22 @@ const RestaurantApplication = () => {
                 placeholder="+1 234 567 8900"
                 value={formData.phone} onChange={handleChange}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                Restaurant Location (Map) <span className="text-primary-500">*</span>
+              </label>
+              <p className="text-xs text-slate-400 mb-2">Pin your exact location. Customers within 10 km will be able to find you.</p>
+              <div className="border border-dark-border rounded-xl p-3 bg-dark/40">
+                <MapPicker
+                  initialPosition={formData.latitude && formData.longitude ? [formData.latitude, formData.longitude] : undefined}
+                  onPositionChange={(pos) => setFormData(prev => ({ ...prev, latitude: pos[0], longitude: pos[1] }))}
+                />
+              </div>
+              {!formData.latitude && (
+                <p className="text-xs text-amber-400 mt-1">⚠ Please pin your location before submitting.</p>
+              )}
             </div>
 
             <div>

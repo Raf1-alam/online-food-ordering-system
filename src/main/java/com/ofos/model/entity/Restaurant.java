@@ -48,6 +48,12 @@ public class Restaurant {
     @Column(name = "closing_time", length = 5)
     private String closingTime;
 
+    @Column(columnDefinition = "DECIMAL(10, 7)")
+    private Double latitude;
+
+    @Column(columnDefinition = "DECIMAL(10, 7)")
+    private Double longitude;
+
     /**
      * The staff user who owns/manages this restaurant.
      * Used for ownership-based access control (IDOR prevention).

@@ -22,4 +22,5 @@ public class MenuItemResponse {
     private String imageUrl;
     private Long restaurantId;
     private String restaurantName;
+    private Integer preparationTimeMinutes;
 }

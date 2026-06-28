@@ -33,6 +33,9 @@ public class RestaurantRequest {
     private String openingTime;
     private String closingTime;
 
+    private Double latitude;
+    private Double longitude;
+
     /** Owner user ID — required when admin creates a restaurant */
     private Long ownerId;
 }

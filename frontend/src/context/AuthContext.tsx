@@ -33,6 +33,8 @@ export const AuthProvider = ({ children }) => {
               email: profile.email,
               phone: profile.phone,
               role: profile.role,
+              latitude: profile.latitude,
+              longitude: profile.longitude,
             };
             localStorage.setItem('ofos_user', JSON.stringify(userObj));
             setUser(userObj);
@@ -89,8 +91,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateLocation = (latitude: number, longitude: number) => {
+    setUser(prev => {
+      if (!prev) return prev;
+      const updated = { ...prev, latitude, longitude };
+      localStorage.setItem('ofos_user', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateLocation }}>
       {children}
     </AuthContext.Provider>
   );

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChefHat, CheckCircle, Package, Truck, XCircle, Clock, UtensilsCrossed, Settings, Save } from 'lucide-react';
+import { ChefHat, CheckCircle, Package, Truck, XCircle, Clock, UtensilsCrossed, Settings, Save, MapPin } from 'lucide-react';
 import MenuManagement from '../components/MenuManagement';
 import Pagination from '../components/Pagination';
+import { MapPicker } from '../components/MapPicker';
 
 const ORDER_STATES = ['PLACED', 'CONFIRMED', 'PREPARING', 'OUT_FOR_DELIVERY', 'DELIVERED'];
 const TERMINAL_STATES = ['DELIVERED', 'CANCELLED'];
@@ -27,10 +28,6 @@ const StaffDashboard = () => {
   const [restaurantId, setRestaurantId] = useState(null);
   const [restaurant, setRestaurant] = useState(null);
 
-  // Holds the staff-entered ETA (in minutes) per order, keyed by order id,
-  // used only while an order is still PLACED and awaiting confirmation.
-  const [etaMinutesByOrder, setEtaMinutesByOrder] = useState<Record<number, string>>({});
-
   const [settingsForm, setSettingsForm] = useState({
     name: '',
     description: '',
@@ -39,6 +36,8 @@ const StaffDashboard = () => {
     imageUrl: '',
     openingTime: '09:00',
     closingTime: '22:00',
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [settingsSuccess, setSettingsSuccess] = useState('');
@@ -76,6 +75,8 @@ const StaffDashboard = () => {
             imageUrl: myRestaurant.imageUrl || '',
             openingTime: myRestaurant.openingTime || '09:00',
             closingTime: myRestaurant.closingTime || '22:00',
+            latitude: myRestaurant.latitude || null,
+            longitude: myRestaurant.longitude || null,
           });
           await fetchOrders(myRestaurant.id);
           interval = setInterval(() => fetchOrders(myRestaurant.id), 15000);
@@ -102,37 +103,14 @@ const StaffDashboard = () => {
     if (currentIndex === -1 || currentIndex === ORDER_STATES.length - 1) return;
 
     const nextStatus = ORDER_STATES[currentIndex + 1];
-
-    // When confirming an order (PLACED -> CONFIRMED), include the ETA the
-    // staff entered so the customer sees it on their Orders page.
-    const payload: { status: string; estimatedDeliveryTime?: string } = { status: nextStatus };
-
-    if (nextStatus === 'CONFIRMED') {
-      const minutesStr = etaMinutesByOrder[orderId];
-      const minutes = parseInt(minutesStr, 10);
-      if (!minutesStr || isNaN(minutes) || minutes <= 0) {
-        alert('Please enter a valid estimated delivery time (in minutes) before confirming.');
-        return;
-      }
-      const eta = new Date(Date.now() + minutes * 60 * 1000);
-      payload.estimatedDeliveryTime = toLocalIsoString(eta);
-    }
+    const payload = { status: nextStatus };
 
     try {
       const res = await api.patch(`/restaurant-staff/orders/${orderId}/status`, payload);
       setOrders(orders.map(o => o.id === orderId ? res.data.data : o));
-      setEtaMinutesByOrder(prev => {
-        const next = { ...prev };
-        delete next[orderId];
-        return next;
-      });
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update order status');
     }
-  };
-
-  const handleEtaInputChange = (orderId: number, value: string) => {
-    setEtaMinutesByOrder(prev => ({ ...prev, [orderId]: value }));
   };
 
   const handleSettingsChange = (e) => {
@@ -379,6 +357,18 @@ const StaffDashboard = () => {
                     />
                   </div>
 
+                  {/* Location Map */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Restaurant Location</label>
+                    <p className="text-xs text-slate-400 mb-2">Set your location to accurately calculate delivery time for customers.</p>
+                    <div className="border border-dark-border rounded-xl p-2 bg-dark/40">
+                      <MapPicker 
+                        initialPosition={settingsForm.latitude && settingsForm.longitude ? [settingsForm.latitude, settingsForm.longitude] : undefined}
+                        onPositionChange={(pos) => setSettingsForm(prev => ({ ...prev, latitude: pos[0], longitude: pos[1] }))}
+                      />
+                    </div>
+                  </div>
+
                 </div>
 
                 {/* Image Preview */}
@@ -461,23 +451,6 @@ const StaffDashboard = () => {
                         <div className="text-xs text-slate-400 mb-4 line-clamp-2">
                           <span className="font-semibold text-slate-300">Deliver to:</span> {order.deliveryAddress}
                         </div>
-
-                        {/* ETA input - only needed when confirming a freshly PLACED order */}
-                        {activeTab === 'ACTIVE' && order.status === 'PLACED' && (
-                            <div className="mb-3">
-                              <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                                Estimated delivery time (minutes from now)
-                              </label>
-                              <input
-                                  type="number"
-                                  min="1"
-                                  placeholder="e.g. 30"
-                                  value={etaMinutesByOrder[order.id] || ''}
-                                  onChange={(e) => handleEtaInputChange(order.id, e.target.value)}
-                                  className="input-field py-2 text-sm"
-                              />
-                            </div>
-                        )}
 
                         {activeTab === 'ACTIVE' && (
                             <button

@@ -30,4 +30,7 @@ public class ApplicationRequest {
 
     @Size(max = 500, message = "Restaurant Image URL must not exceed 500 characters")
     private String restaurantImageUrl;
+
+    private Double latitude;
+    private Double longitude;
 }

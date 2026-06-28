@@ -22,6 +22,9 @@ public class RestaurantResponse {
     private String imageUrl;
     private String openingTime;
     private String closingTime;
+    private Double latitude;
+    private Double longitude;
+    private Double distance; // in km
     @JsonProperty("isCurrentlyOpen")
     private boolean isCurrentlyOpen;
     private Double rating;

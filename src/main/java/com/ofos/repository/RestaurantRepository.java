@@ -15,5 +15,9 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
     
     Page<Restaurant> findByActiveTrueAndNameContainingIgnoreCase(String name, Pageable pageable);
 
+    List<Restaurant> findByActiveTrue();
+
+    List<Restaurant> findByActiveTrueAndNameContainingIgnoreCase(String name);
+
     List<Restaurant> findByOwnerId(Long ownerId);
 }

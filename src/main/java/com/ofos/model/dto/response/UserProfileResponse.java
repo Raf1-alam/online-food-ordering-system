@@ -17,5 +17,7 @@ public class UserProfileResponse {
     private String email;
     private String phone;
     private Role role;
+    private Double latitude;
+    private Double longitude;
     private LocalDateTime createdAt;
 }
