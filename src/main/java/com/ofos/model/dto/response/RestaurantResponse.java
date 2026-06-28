@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @Builder
@@ -19,6 +20,10 @@ public class RestaurantResponse {
     private String address;
     private String phone;
     private String imageUrl;
+    private String openingTime;
+    private String closingTime;
+    @JsonProperty("isCurrentlyOpen")
+    private boolean isCurrentlyOpen;
     private Long ownerId;
     private String ownerName;
     private boolean active;

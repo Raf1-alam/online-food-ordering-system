@@ -12,6 +12,8 @@ import CartSidebar from './components/CartSidebar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Menu from './pages/Menu';
 import Checkout from './pages/Checkout';
 import StaffDashboard from './pages/StaffDashboard';
@@ -70,6 +72,8 @@ const App = () => {
                 <Route path="/" element={<AdminStaffRedirect><Home /></AdminStaffRedirect>} />
                 <Route path="/login" element={<AdminStaffRedirect><Login /></AdminStaffRedirect>} />
                 <Route path="/register" element={<AdminStaffRedirect><Register /></AdminStaffRedirect>} />
+                <Route path="/forgot-password" element={<AdminStaffRedirect><ForgotPassword /></AdminStaffRedirect>} />
+                <Route path="/reset-password" element={<AdminStaffRedirect><ResetPassword /></AdminStaffRedirect>} />
                 <Route path="/restaurants" element={<AdminStaffRedirect><RestaurantList /></AdminStaffRedirect>} />
                 <Route path="/restaurants/:id/menu" element={<AdminStaffRedirect><Menu /></AdminStaffRedirect>} />
                 <Route path="/about" element={<AdminStaffRedirect><About /></AdminStaffRedirect>} />

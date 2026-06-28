@@ -3,7 +3,9 @@ package com.ofos.service.impl;
 import com.ofos.exception.ResourceNotFoundException;
 import com.ofos.model.dto.request.OrderRequest;
 import com.ofos.model.dto.request.OrderStatusUpdateRequest;
+import com.ofos.model.dto.request.CartItemRequest;
 import com.ofos.model.dto.response.OrderResponse;
+import com.ofos.model.dto.response.CartResponse;
 import com.ofos.model.entity.*;
 import com.ofos.model.enums.OrderStatus;
 import com.ofos.model.enums.PaymentStatus;
@@ -16,6 +18,7 @@ import com.ofos.pattern.strategy.PaymentResult;
 import com.ofos.pattern.strategy.PaymentStrategy;
 import com.ofos.repository.*;
 import com.ofos.service.CartService;
+import com.ofos.service.EmailService;
 import com.ofos.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +56,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderStateFactory stateFactory;
     private final PaymentStrategyFactory paymentStrategyFactory;
     private final CartService cartService;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -66,6 +70,10 @@ public class OrderServiceImpl implements OrderService {
 
         User customer = cart.getUser();
         Restaurant restaurant = cart.getItems().get(0).getMenuItem().getRestaurant();
+
+        if (!restaurant.isCurrentlyOpen()) {
+            throw new IllegalArgumentException("This restaurant is currently closed");
+        }
 
         // 1. Factory Pattern: assemble order with price snapshots
         Order order = orderFactory.createOrder(customer, restaurant, cart.getItems(), request.getDeliveryAddress());
@@ -109,6 +117,11 @@ public class OrderServiceImpl implements OrderService {
 
         log.info("Order #{} placed successfully by user {} via {}", 
                  order.getId(), customer.getEmail(), request.getPaymentMethod());
+
+        emailService.sendEmail(customer.getEmail(), 
+            "Order Confirmation - #" + order.getId(), 
+            "Your order #" + order.getId() + " has been placed successfully.\nTotal amount: $" + order.getTotalAmount()
+        );
 
         return toResponse(order, payment);
     }
@@ -180,6 +193,15 @@ public class OrderServiceImpl implements OrderService {
         order = orderRepository.save(order);
         log.info("Order #{} status updated to {} by staff {}", order.getId(), order.getStatus(), staff.getEmail());
 
+        String statusText = "Your order #" + order.getId() + " status has been updated to: " + order.getStatus();
+        if (request.getEstimatedDeliveryTime() != null) {
+            statusText += "\nEstimated delivery time: " + request.getEstimatedDeliveryTime();
+        }
+        emailService.sendEmail(order.getUser().getEmail(), 
+            "Order Status Update - #" + order.getId(), 
+            statusText
+        );
+
         Payment payment = paymentRepository.findByOrderId(order.getId()).orElse(null);
         return toResponse(order, payment);
     }
@@ -207,7 +229,41 @@ public class OrderServiceImpl implements OrderService {
             log.info("Payment for order #{} marked as refunded", order.getId());
         }
 
+        emailService.sendEmail(order.getUser().getEmail(), 
+            "Order Cancelled - #" + order.getId(), 
+            "Your order #" + order.getId() + " has been cancelled. If you already paid, you will be refunded shortly."
+        );
+
         return toResponse(order, payment);
+    }
+
+    @Override
+    @Transactional
+    public CartResponse reorder(Long orderId, Long currentUserId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
+
+        verifyOrderAccess(order, currentUserId);
+
+        cartService.clearCart(currentUserId);
+        CartResponse lastResponse = null;
+
+        for (OrderItem item : order.getItems()) {
+            try {
+                CartItemRequest req = CartItemRequest.builder()
+                        .menuItemId(item.getMenuItem().getId())
+                        .quantity(item.getQuantity())
+                        .build();
+                lastResponse = cartService.addItem(currentUserId, req);
+            } catch (Exception e) {
+                log.warn("Could not re-add item {} to cart: {}", item.getItemName(), e.getMessage());
+            }
+        }
+        
+        if (lastResponse == null) {
+            return cartService.getCart(currentUserId);
+        }
+        return lastResponse;
     }
 
     // ==================== Helpers ====================

@@ -86,6 +86,23 @@ public class Cart {
     }
 
     /**
+     * Updates the quantity of an item in the cart.
+     * @throws IllegalArgumentException if quantity <= 0
+     */
+    public void updateItemQty(Long cartItemId, int newQuantity) {
+        if (newQuantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive. Use removeItem to delete.");
+        }
+        for (CartItem cartItem : items) {
+            if (cartItem.getId().equals(cartItemId)) {
+                cartItem.setQuantity(newQuantity);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Cart item not found");
+    }
+
+    /**
      * Removes an item from the cart by its cart item ID.
      */
     public void removeItem(Long cartItemId) {

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import api from '../services/api';
 import { Order } from '../types';
-import { Package, ChefHat, Truck, CheckCircle, XCircle, Star, X, Clock } from 'lucide-react';
+import { Package, ChefHat, Truck, CheckCircle, XCircle, Star, X, Clock, RefreshCw } from 'lucide-react';
 import Pagination from '../components/Pagination';
+import { useCart } from '../context/CartContext';
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -30,6 +32,10 @@ const Orders = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [cancelOrderId, setCancelOrderId] = useState<number | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const [reorderingId, setReorderingId] = useState<number | null>(null);
+  
+  const { fetchCart } = useCart();
+  const navigate = useNavigate();
 
   const handleOpenReviewModal = (order: Order) => {
     setSelectedOrder(order);
@@ -93,6 +99,19 @@ const Orders = () => {
       alert(err.response?.data?.message || 'Failed to cancel order.');
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleReorder = async (orderId: number) => {
+    setReorderingId(orderId);
+    try {
+      await api.post(`/orders/${orderId}/reorder`);
+      await fetchCart();
+      navigate('/checkout'); // Direct to checkout for quick reordering
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to reorder items.');
+    } finally {
+      setReorderingId(null);
     }
   };
 
@@ -218,9 +237,19 @@ const Orders = () => {
 
                       {/* Visual Tracker or Cancelled Banner */}
                       {isCancelled ? (
-                          <div className="flex items-center justify-center gap-3 p-4 bg-red-950/20 border border-red-500/20 rounded-2xl text-red-400 font-medium text-sm">
-                            <XCircle className="h-5 w-5" />
-                            <span>This order has been cancelled</span>
+                          <div className="flex flex-col items-center justify-center gap-3 p-4 bg-red-950/20 border border-red-500/20 rounded-2xl text-red-400 font-medium text-sm">
+                            <div className="flex items-center gap-3">
+                              <XCircle className="h-5 w-5" />
+                              <span>This order has been cancelled</span>
+                            </div>
+                            <button
+                                onClick={() => handleReorder(order.id)}
+                                disabled={reorderingId === order.id}
+                                className="mt-2 flex items-center gap-2 px-4 py-1.5 rounded-full border border-red-500/30 hover:bg-red-500/10 transition-colors"
+                            >
+                              {reorderingId === order.id ? <span className="animate-spin w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full" /> : <RefreshCw className="h-4 w-4" />}
+                              Reorder
+                            </button>
                           </div>
                       ) : (
                           <div className="relative py-8 px-2">
@@ -254,7 +283,15 @@ const Orders = () => {
 
                       {/* Rate & Review Button for Delivered Orders */}
                       {order.status === 'DELIVERED' && (
-                          <div className="mt-6 pt-6 border-t border-dark-border/40 flex justify-end">
+                          <div className="mt-6 pt-6 border-t border-dark-border/40 flex justify-end gap-3">
+                            <button
+                                onClick={() => handleReorder(order.id)}
+                                disabled={reorderingId === order.id}
+                                className="btn-outline py-2 px-6 text-sm flex items-center gap-2 border-primary-500/50"
+                            >
+                              {reorderingId === order.id ? <span className="animate-spin w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full" /> : <RefreshCw className="h-4 w-4" />}
+                              Reorder
+                            </button>
                             {reviewedOrderIds.has(order.id) ? (
                                 <button
                                     disabled

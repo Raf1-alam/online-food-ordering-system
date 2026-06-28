@@ -1,6 +1,7 @@
 package com.ofos.controller;
 
 import com.ofos.model.dto.request.CartItemRequest;
+import com.ofos.model.dto.request.CartItemUpdateRequest;
 import com.ofos.model.dto.response.ApiResponse;
 import com.ofos.model.dto.response.CartResponse;
 import com.ofos.service.CartService;
@@ -51,6 +52,17 @@ public class CartController {
         Long userId = getUserIdFromEmail(userDetails.getUsername());
         CartResponse response = cartService.removeItem(userId, itemId);
         return ResponseEntity.ok(ApiResponse.success("Item removed", response));
+    }
+
+    @PutMapping("/items/{itemId}")
+    @Operation(summary = "Update cart item quantity")
+    public ResponseEntity<ApiResponse<CartResponse>> updateItemQuantity(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long itemId,
+            @Valid @RequestBody CartItemUpdateRequest request) {
+        Long userId = getUserIdFromEmail(userDetails.getUsername());
+        CartResponse response = cartService.updateItemQuantity(userId, itemId, request.getQuantity());
+        return ResponseEntity.ok(ApiResponse.success("Item quantity updated", response));
     }
 
     @DeleteMapping

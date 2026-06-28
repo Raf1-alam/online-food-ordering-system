@@ -19,6 +19,18 @@ spring:
   flyway:
     enabled: true
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: thunderblast0090@gmail.com
+    password: zsfrekbrxuqpvztu
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 # Swagger enabled in dev
 springdoc:
   swagger-ui:

@@ -3,7 +3,14 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
 import { motion } from 'framer-motion';
-import { CreditCard, MapPin, Smartphone, CheckCircle } from 'lucide-react';
+import { CreditCard, MapPin, Smartphone, CheckCircle, Plus } from 'lucide-react';
+
+interface UserAddress {
+  id: number;
+  label: string;
+  fullAddress: string;
+  isDefault: boolean;
+}
 
 const Checkout = () => {
   const { cart, fetchCart } = useCart();
@@ -20,6 +27,32 @@ const Checkout = () => {
   const [couponError, setCouponError] = useState('');
   const [couponSuccess, setCouponSuccess] = useState('');
   const [checkingCoupon, setCheckingCoupon] = useState(false);
+  const [savedAddresses, setSavedAddresses] = useState<UserAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+  const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
+  const [newAddressLabel, setNewAddressLabel] = useState('Home');
+
+  React.useEffect(() => {
+    fetchAddresses();
+  }, []);
+
+  const fetchAddresses = async () => {
+    try {
+      const res = await api.get('/addresses');
+      const addrs = res.data.data || [];
+      setSavedAddresses(addrs);
+      if (addrs.length > 0) {
+        const defaultAddr = addrs.find(a => a.isDefault);
+        if (defaultAddr) setSelectedAddressId(defaultAddr.id);
+        else setSelectedAddressId(addrs[0].id);
+      } else {
+        setIsAddingNewAddress(true);
+      }
+    } catch (error) {
+      console.error('Failed to load addresses', error);
+      setIsAddingNewAddress(true);
+    }
+  };
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -53,19 +86,40 @@ const Checkout = () => {
 
   const handleCheckout = async (e) => {
     e.preventDefault();
-    if (!address.trim()) {
-      setError('Delivery address is required');
-      return;
+    
+    let finalAddress = '';
+    
+    if (isAddingNewAddress) {
+      if (!address.trim()) {
+        setError('Delivery address is required');
+        return;
+      }
+      finalAddress = address.trim();
+      
+      // Optionally save it as well if they are adding a new one
+      if (savedAddresses.length < 5) {
+        try {
+          await api.post('/addresses', { label: newAddressLabel, fullAddress: finalAddress });
+        } catch (err) {
+          console.error('Failed to save new address', err);
+        }
+      }
+    } else {
+      const selected = savedAddresses.find(a => a.id === selectedAddressId);
+      if (!selected) {
+        setError('Please select a delivery address');
+        return;
+      }
+      finalAddress = selected.fullAddress;
     }
 
     setIsProcessing(true);
     setError('');
 
     try {
-      // The backend computes the total from the cart entity. We just provide method, address, and coupon code.
       const res = await api.post('/orders', {
         paymentMethod,
-        deliveryAddress: address,
+        deliveryAddress: finalAddress,
         couponCode: appliedCoupon || null
       });
       setSuccessOrder(res.data.data);
@@ -88,16 +142,69 @@ const Checkout = () => {
         {/* Left Col: Forms */}
         <div className="lg:col-span-2 space-y-6">
           <div className="glass-panel p-6 space-y-4">
-            <h2 className="text-xl font-semibold text-white flex items-center gap-2 border-b border-dark-border pb-3">
-              <MapPin className="h-5 w-5 text-primary-500" /> Delivery Address
-            </h2>
-            <textarea 
-              className="input-field min-h-[100px] resize-none"
-              placeholder="e.g., 123 Main St, Apt 4B, City, Country"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              required
-            ></textarea>
+            <div className="flex justify-between items-center border-b border-dark-border pb-3">
+              <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary-500" /> Delivery Address
+              </h2>
+              {savedAddresses.length > 0 && savedAddresses.length < 5 && (
+                <button 
+                  type="button"
+                  onClick={() => setIsAddingNewAddress(!isAddingNewAddress)}
+                  className="text-sm text-primary-400 hover:text-primary-300 flex items-center gap-1 font-medium"
+                >
+                  {isAddingNewAddress ? 'Choose Saved' : <><Plus className="w-4 h-4"/> Add New</>}
+                </button>
+              )}
+            </div>
+            
+            {savedAddresses.length > 0 && !isAddingNewAddress ? (
+              <div className="space-y-3 pt-2">
+                {savedAddresses.map(addr => (
+                  <label key={addr.id} className={`flex items-start gap-3 p-4 rounded-xl cursor-pointer border transition-all ${selectedAddressId === addr.id ? 'border-primary-500 bg-primary-900/10' : 'border-dark-border bg-dark/40 hover:border-slate-600'}`}>
+                    <input 
+                      type="radio" 
+                      name="addressId" 
+                      className="mt-1 accent-primary-500 w-4 h-4"
+                      checked={selectedAddressId === addr.id}
+                      onChange={() => setSelectedAddressId(addr.id)}
+                    />
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-white">{addr.label}</span>
+                        {addr.isDefault && <span className="text-[10px] uppercase font-bold bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">Default</span>}
+                      </div>
+                      <p className="text-sm text-slate-400">{addr.fullAddress}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3 pt-2">
+                <div className="flex gap-4">
+                  <div className="w-1/3">
+                    <select 
+                      className="input-field py-2"
+                      value={newAddressLabel}
+                      onChange={(e) => setNewAddressLabel(e.target.value)}
+                    >
+                      <option value="Home">Home</option>
+                      <option value="Office">Office</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div className="w-2/3">
+                    <textarea 
+                      className="input-field min-h-[80px] resize-none"
+                      placeholder="e.g., 123 Main St, Apt 4B, City, Country"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      required={isAddingNewAddress}
+                    ></textarea>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-500 text-right">This address will be saved for future orders.</p>
+              </div>
+            )}
           </div>
 
           <div className="glass-panel p-6 space-y-4">

@@ -5,7 +5,7 @@ import { ShoppingBag, X, Plus, Minus, Trash2, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const CartSidebar = ({ isOpen, onClose }) => {
-  const { cart, removeItem, addItem, clearCart } = useCart();
+  const { cart, removeItem, updateQuantity, clearCart } = useCart();
   const [isUpdating, setIsUpdating] = useState(false);
   const navigate = useNavigate();
 
@@ -13,13 +13,11 @@ const CartSidebar = ({ isOpen, onClose }) => {
     if (isUpdating) return;
     setIsUpdating(true);
     try {
-      if (item.quantity + delta <= 0) {
+      const newQuantity = item.quantity + delta;
+      if (newQuantity <= 0) {
         await removeItem(item.id);
       } else {
-        // Our backend addItem expects menuItemId and quantity to ADD. 
-        // If we want to decrement, we need an update endpoint, but let's assume addItem adds delta.
-        // Wait, the backend addItem adds the quantity. If delta is negative, we need to pass negative.
-        await addItem(item.menuItemId, delta);
+        await updateQuantity(item.id, newQuantity);
       }
     } finally {
       setIsUpdating(false);

@@ -78,6 +78,16 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
+    public CartResponse updateItemQuantity(Long userId, Long cartItemId, int quantity) {
+        Cart cart = getOrCreateCart(userId);
+        cart.updateItemQty(cartItemId, quantity);
+        cart = cartRepository.save(cart);
+        log.info("Item quantity updated in cart for user {}", userId);
+        return toResponse(cart);
+    }
+
+    @Override
+    @Transactional
     public CartResponse clearCart(Long userId) {
         Cart cart = getOrCreateCart(userId);
         

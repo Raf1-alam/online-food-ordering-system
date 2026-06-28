@@ -15,6 +15,10 @@ export interface Restaurant {
   rating: number;
   active: boolean;
   ownerId: number;
+  imageUrl?: string;
+  openingTime?: string;
+  closingTime?: string;
+  isCurrentlyOpen?: boolean;
 }
 
 export interface MenuItem {

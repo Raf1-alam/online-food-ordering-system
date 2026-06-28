@@ -30,6 +30,9 @@ public class RestaurantRequest {
     @Size(max = 500, message = "Image URL must not exceed 500 characters")
     private String imageUrl;
 
+    private String openingTime;
+    private String closingTime;
+
     /** Owner user ID — required when admin creates a restaurant */
     private Long ownerId;
 }

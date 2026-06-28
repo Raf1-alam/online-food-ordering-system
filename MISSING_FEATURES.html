@@ -315,10 +315,22 @@
       <tr><td class="feature-name">Admin — Transaction Log</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
       <tr><td class="feature-name">Restaurant Application &amp; Approval</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
       <tr><td class="feature-name">Pagination System (All Tables &amp; Lists)</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
-      <tr><td class="feature-name">Favorites — Backend API</td><td><span class="pill pill-amber">⚠ Backend Only — No UI</span></td></tr>
-      <tr><td class="feature-name">Coupon/Promo Codes — Validation API</td><td><span class="pill pill-amber">⚠ Backend Only — Not Wired to Checkout</span></td></tr>
-      <tr><td class="feature-name">Restaurant Images</td><td><span class="pill pill-amber">⚠ Hardcoded Placeholder</span></td></tr>
-      <tr><td class="feature-name">Menu Item Images</td><td><span class="pill pill-amber">⚠ Stored in DB — Not Displayed</span></td></tr>
+      <tr><td class="feature-name">Favorites System (UI & API)</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">Coupon/Promo Codes & Checkout</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">Restaurant Images</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">Menu Item Images</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">Order Cancellation by Customer</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">Admin: Coupon Management</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">About Us &amp; Contact Pages</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">Estimated Delivery Time (ETA)</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">Email Confirmations &amp; Status Notifications</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">Forgot Password / Password Reset Flow</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">Saved Delivery Addresses (Address Book)</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">Restaurant Profile Editor (Staff)</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">Operating Hours / Open-Closed Status</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">Menu Item Categories &amp; Filtering Tabs</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">Cart Item Quantity Editing</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
+      <tr><td class="feature-name">Reorder from Previous Orders</td><td><span class="pill pill-green">✓ Complete</span></td></tr>
     </tbody>
   </table>
 
@@ -326,95 +338,14 @@
 
   <!-- CRITICAL -->
   <div class="section-label">
-    <div class="dot" style="background:var(--primary)"></div>
+    <div class="dot" style="background:var(--emerald)"></div>
     <h2>🔴 Critical — Missing for Real Usability</h2>
-    <span class="count pill pill-red">7 features</span>
+    <span class="count pill pill-green">0 features</span>
   </div>
 
   <div class="cards">
-
-    <div class="card critical">
-      <div class="card-header">
-        <span class="card-num">#1</span>
-        <div class="card-title">Coupon / Promo Code Field at Checkout</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What exists:</span><span class="value"><code>GET /api/v1/coupons/validate/{code}</code> — validates a code and returns a <code>discountPercentage</code>.</span></div>
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">The Checkout page has NO coupon input field. Users cannot apply discounts even though the infrastructure is fully built.</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Add a coupon code input to <code>Checkout.tsx</code> that calls the validate endpoint and subtracts the discount from the cart total before submission.</span></div>
-      </div>
-    </div>
-
-    <div class="card critical">
-      <div class="card-header">
-        <span class="card-num">#2</span>
-        <div class="card-title">Favorites Page / UI — Button Not Wired to Backend</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What exists:</span><span class="value"><code>POST /api/v1/favorites/{restaurantId}</code> (toggle) and <code>GET /api/v1/favorites</code> (returns set of IDs).</span></div>
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">The heart button in <code>RestaurantList.tsx</code> is purely client-side state — favorites are never saved to the database. No "My Favorites" page exists.</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Wire the heart button to the backend toggle endpoint. Add a "My Favorites" page that loads the user's saved restaurants.</span></div>
-      </div>
-    </div>
-
-    <div class="card critical">
-      <div class="card-header">
-        <span class="card-num">#3</span>
-        <div class="card-title">Real Restaurant Images</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What exists:</span><span class="value">Every restaurant card shows the exact same hardcoded Unsplash photo URL.</span></div>
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">Restaurant-specific images — the <code>Restaurant</code> entity has no <code>imageUrl</code> field. No upload mechanism exists.</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Add <code>imageUrl</code> to <code>Restaurant</code> entity, expose it in request/response DTOs, let staff set it during application or in their profile. Display it on cards.</span></div>
-      </div>
-    </div>
-
-    <div class="card critical">
-      <div class="card-header">
-        <span class="card-num">#4</span>
-        <div class="card-title">Menu Item Images Not Displayed</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What exists:</span><span class="value"><code>MenuItem</code> entity has an <code>imageUrl</code> field and it is stored in the DB.</span></div>
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">Nowhere on the menu page are item images rendered — the field is simply ignored by the UI.</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Render <code>menuItem.imageUrl</code> in the menu item card. Fall back to a placeholder icon if null.</span></div>
-      </div>
-    </div>
-
-    <div class="card critical">
-      <div class="card-header">
-        <span class="card-num">#5</span>
-        <div class="card-title">Order Cancellation by Customer</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What exists:</span><span class="value">A <code>CANCELLED</code> status exists in the state machine and is displayed on the Staff Dashboard history tab.</span></div>
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">Customers cannot cancel their own order. There is no "Cancel Order" button in <code>MyOrders.tsx</code> for eligible orders in <code>PLACED</code> state.</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Add a cancel button visible only when <code>status === 'PLACED'</code>. Add a backend endpoint that transitions the order to <code>CANCELLED</code>.</span></div>
-      </div>
-    </div>
-
-    <div class="card critical">
-      <div class="card-header">
-        <span class="card-num">#6</span>
-        <div class="card-title">Admin: Coupon Management UI</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What exists:</span><span class="value">The <code>Coupon</code> entity (code, discountPercentage, expiryDate, active) and a validation-only endpoint.</span></div>
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">Admins have no way to create, list, or deactivate coupons through the UI. No admin CRUD endpoints exist for coupons.</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Add Coupon Management tab to Admin Dashboard with list, create form (code / discount% / expiry date), and deactivate toggle. Add backend CRUD endpoints.</span></div>
-      </div>
-    </div>
-
-    <div class="card critical">
-      <div class="card-header">
-        <span class="card-num">#7</span>
-        <div class="card-title">About Us &amp; Contact Pages (404)</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What exists:</span><span class="value">Navbar links labeled "About Us" and "Contact" are visible to guests and customers.</span></div>
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">Clicking either link leads to a 404 — no route or page content exists.</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Create simple static pages for <code>/about</code> and <code>/contact</code> with team information and a contact form.</span></div>
-      </div>
+    <div class="card nice" style="border-left-color: var(--emerald); text-align: center; padding: 30px;">
+      <div class="card-title" style="margin-bottom: 0;">🎉 All critical features have been implemented!</div>
     </div>
 
   </div>
@@ -425,110 +356,13 @@
   <div class="section-label">
     <div class="dot" style="background:var(--amber)"></div>
     <h2>🟡 Important — Significant UX Gaps</h2>
-    <span class="count pill pill-amber">9 features</span>
+    <span class="count pill pill-amber">0 features</span>
   </div>
 
   <div class="cards">
-
-    <div class="card important">
-      <div class="card-header">
-        <span class="card-num">#8</span>
-        <div class="card-title">Email Confirmations &amp; Status Notifications</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">No email is sent when an order is placed or when its status changes. Users cannot trust the system — there is no paper trail.</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Integrate Spring Mail (<code>JavaMailSender</code>) to send order confirmation and status update emails to customers.</span></div>
-      </div>
+    <div class="card nice" style="border-left-color: var(--amber); text-align: center; padding: 30px;">
+      <div class="card-title" style="margin-bottom: 0;">🎉 All important UX gap features have been implemented!</div>
     </div>
-
-    <div class="card important">
-      <div class="card-header">
-        <span class="card-num">#9</span>
-        <div class="card-title">Forgot Password / Password Reset Flow</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">If a user forgets their password there is no recovery mechanism — only an admin can manually reset accounts.</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Add "Forgot Password" on the login page. Backend generates a short-lived reset token, sends a reset email, and exposes a token-authenticated reset endpoint.</span></div>
-      </div>
-    </div>
-
-    <div class="card important">
-      <div class="card-header">
-        <span class="card-num">#10</span>
-        <div class="card-title">Saved Delivery Addresses (Address Book)</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">Every order requires the customer to type their full delivery address from scratch. Real platforms save addresses (Uber Eats, Foodpanda).</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Add an <code>addresses</code> table linked to users. Allow saving 3–5 addresses. Show a dropdown at checkout to select a saved address or enter a new one.</span></div>
-      </div>
-    </div>
-
-    <div class="card important">
-      <div class="card-header">
-        <span class="card-num">#11</span>
-        <div class="card-title">Restaurant Profile Editor (Staff)</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">Staff can manage their menu but cannot edit their restaurant's own public profile — name, description, address, phone, image, cuisine type, or opening hours.</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Add a "Restaurant Settings" tab to the Staff Dashboard with a form that loads and saves the restaurant's public details via <code>PUT /api/v1/restaurants/{id}</code>.</span></div>
-      </div>
-    </div>
-
-    <div class="card important">
-      <div class="card-header">
-        <span class="card-num">#12</span>
-        <div class="card-title">Operating Hours / Open-Closed Status</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">Restaurants have no operating hours. A customer can attempt to order from a restaurant at 3 AM even if it's closed.</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Add <code>openingTime</code> / <code>closingTime</code> fields to <code>Restaurant</code>. Show an "Open / Closed" badge on restaurant cards. Prevent checkout from closed restaurants.</span></div>
-      </div>
-    </div>
-
-    <div class="card important">
-      <div class="card-header">
-        <span class="card-num">#13</span>
-        <div class="card-title">Estimated Delivery Time (ETA)</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">Once an order is placed, customers have no idea when to expect it. There is no ETA shown anywhere in the UI.</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Store <code>estimatedDeliveryTime</code> in the Order entity, set by staff when confirming. Display it prominently in <code>MyOrders.tsx</code> for active orders.</span></div>
-      </div>
-    </div>
-
-    <div class="card important">
-      <div class="card-header">
-        <span class="card-num">#14</span>
-        <div class="card-title">Menu Item Categories &amp; Filtering Tabs</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">The menu page shows all items in a flat list with only a text search. Real menus group items by category (Starters, Mains, Desserts, Drinks).</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Add a <code>category</code> field to <code>MenuItem</code>. Group the menu display by category tabs. Support category assignment in <code>MenuManagement</code>.</span></div>
-      </div>
-    </div>
-
-    <div class="card important">
-      <div class="card-header">
-        <span class="card-num">#15</span>
-        <div class="card-title">Cart Item Quantity Editing</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">Once an item is in the cart, users cannot change the quantity in the sidebar — they must remove and re-add the item entirely.</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Add +/− buttons next to each cart item in <code>CartSidebar.tsx</code> that call <code>PUT /api/v1/cart/items/{itemId}</code> with the updated quantity.</span></div>
-      </div>
-    </div>
-
-    <div class="card important">
-      <div class="card-header">
-        <span class="card-num">#16</span>
-        <div class="card-title">Reorder from Previous Orders</div>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="label">What's missing:</span><span class="value">Users with previous orders have no way to quickly reorder the same items. Past orders show items but there is no "Reorder" shortcut.</span></div>
-        <div class="info-row"><span class="label">Fix:</span><span class="fix">Add a "Reorder" button to completed order cards in <code>MyOrders.tsx</code> that pre-fills the cart with the same items from the same restaurant.</span></div>
-      </div>
-    </div>
-
   </div>
 
   <hr>
@@ -592,14 +426,14 @@
   <!-- SUMMARY -->
   <div class="summary-grid">
     <div class="summary-card">
-      <div class="num c-red">7</div>
+      <div class="num c-green">0</div>
       <div class="label">🔴 Critical Features</div>
-      <div class="items">Coupon UI · Favorites UI<br>Real Images · Item Images<br>Order Cancel · Coupon Mgmt<br>About/Contact Pages</div>
+      <div class="items">All critical features<br>have been successfully<br>implemented!</div>
     </div>
     <div class="summary-card">
-      <div class="num c-amber">9</div>
+      <div class="num c-amber">0</div>
       <div class="label">🟡 Important Features</div>
-      <div class="items">Email Notifs · Password Reset<br>Address Book · Restaurant Profile<br>Hours · ETA · Menu Categories<br>Cart Qty · Reorder</div>
+      <div class="items">All important features<br>have been successfully<br>implemented!</div>
     </div>
     <div class="summary-card">
       <div class="num c-green">9</div>

@@ -3,6 +3,7 @@ package com.ofos.controller;
 import com.ofos.model.dto.request.OrderRequest;
 import com.ofos.model.dto.response.ApiResponse;
 import com.ofos.model.dto.response.OrderResponse;
+import com.ofos.model.dto.response.CartResponse;
 import com.ofos.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -67,6 +68,16 @@ public class OrderController {
         Long userId = getUserIdFromEmail(userDetails.getUsername());
         OrderResponse response = orderService.cancelOrder(id, userId);
         return ResponseEntity.ok(ApiResponse.success("Order cancelled", response));
+    }
+
+    @PostMapping("/{id}/reorder")
+    @Operation(summary = "Reorder from a previous order")
+    public ResponseEntity<ApiResponse<CartResponse>> reorder(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long id) {
+        Long userId = getUserIdFromEmail(userDetails.getUsername());
+        CartResponse response = orderService.reorder(id, userId);
+        return ResponseEntity.ok(ApiResponse.success("Items added to cart", response));
     }
 
     private Long getUserIdFromEmail(String email) {

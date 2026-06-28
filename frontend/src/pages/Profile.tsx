@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { motion } from 'framer-motion';
-import { User as UserIcon, Mail, Phone, Lock, Save, AlertCircle, CheckCircle } from 'lucide-react';
+import { User as UserIcon, Mail, Phone, Lock, Save, AlertCircle, CheckCircle, MapPin, Trash2, Plus, Star } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+
+interface UserAddress {
+  id: number;
+  label: string;
+  fullAddress: string;
+  isDefault: boolean;
+}
 
 const Profile = () => {
   const { user, login } = useAuth(); // We might need to update user context if name changes, but page reload works too.
@@ -19,8 +26,15 @@ const Profile = () => {
     confirmPassword: ''
   });
 
+  const [activeTab, setActiveTab] = useState<'profile' | 'addresses'>('profile');
+  const [addresses, setAddresses] = useState<UserAddress[]>([]);
+  const [loadingAddresses, setLoadingAddresses] = useState(false);
+  const [newAddress, setNewAddress] = useState({ label: 'Home', fullAddress: '' });
+  const [isAddingAddress, setIsAddingAddress] = useState(false);
+
   useEffect(() => {
     fetchProfile();
+    fetchAddresses();
   }, []);
 
   const fetchProfile = async () => {
@@ -40,6 +54,56 @@ const Profile = () => {
       setMessage({ type: 'error', text: 'Failed to load profile data.' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAddresses = async () => {
+    try {
+      setLoadingAddresses(true);
+      const res = await api.get('/addresses');
+      setAddresses(res.data.data || []);
+    } catch (error) {
+      console.error('Failed to load addresses', error);
+    } finally {
+      setLoadingAddresses(false);
+    }
+  };
+
+  const handleAddAddress = async (e) => {
+    e.preventDefault();
+    if (addresses.length >= 5) {
+      setMessage({ type: 'error', text: 'Maximum of 5 addresses allowed.' });
+      return;
+    }
+    try {
+      setSubmitting(true);
+      await api.post('/addresses', newAddress);
+      await fetchAddresses();
+      setIsAddingAddress(false);
+      setNewAddress({ label: 'Home', fullAddress: '' });
+      setMessage({ type: 'success', text: 'Address added successfully!' });
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to add address.' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteAddress = async (id: number) => {
+    try {
+      await api.delete(`/addresses/${id}`);
+      await fetchAddresses();
+    } catch (error) {
+      console.error('Failed to delete address', error);
+    }
+  };
+
+  const handleSetDefaultAddress = async (id: number) => {
+    try {
+      await api.patch(`/addresses/${id}/default`);
+      await fetchAddresses();
+    } catch (error) {
+      console.error('Failed to set default address', error);
     }
   };
 
@@ -108,9 +172,26 @@ const Profile = () => {
             {formData.fullName.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-white">My Profile</h1>
-            <p className="text-slate-400">Manage your account information</p>
+            <h1 className="text-3xl font-bold text-white">My Account</h1>
+            <p className="text-slate-400">Manage your profile and settings</p>
           </div>
+        </div>
+
+        <div className="flex gap-4 border-b border-dark-border mb-6">
+          <button 
+            className={`pb-3 px-4 font-semibold text-sm transition-colors relative ${activeTab === 'profile' ? 'text-primary-500' : 'text-slate-400 hover:text-white'}`}
+            onClick={() => { setActiveTab('profile'); setMessage({ type: '', text: '' }); }}
+          >
+            Profile Info
+            {activeTab === 'profile' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 shadow-[0_0_10px_rgba(255,30,56,0.8)]"></div>}
+          </button>
+          <button 
+            className={`pb-3 px-4 font-semibold text-sm transition-colors relative ${activeTab === 'addresses' ? 'text-primary-500' : 'text-slate-400 hover:text-white'}`}
+            onClick={() => { setActiveTab('addresses'); setMessage({ type: '', text: '' }); }}
+          >
+            Address Book
+            {activeTab === 'addresses' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 shadow-[0_0_10px_rgba(255,30,56,0.8)]"></div>}
+          </button>
         </div>
 
         {message.text && (
@@ -122,7 +203,8 @@ const Profile = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {activeTab === 'profile' ? (
+          <form onSubmit={handleSubmit} className="space-y-6">
           
           {/* Personal Info Section */}
           <div className="space-y-4">
@@ -222,6 +304,104 @@ const Profile = () => {
             </button>
           </div>
         </form>
+        ) : (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-white">Saved Addresses</h2>
+              {!isAddingAddress && addresses.length < 5 && (
+                <button 
+                  onClick={() => setIsAddingAddress(true)}
+                  className="btn-outline py-1.5 px-4 text-sm flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" /> Add New
+                </button>
+              )}
+            </div>
+
+            {isAddingAddress && (
+              <form onSubmit={handleAddAddress} className="bg-dark/40 border border-dark-border p-5 rounded-xl space-y-4 mb-6">
+                <h3 className="font-semibold text-white mb-2">New Address</h3>
+                <div className="flex gap-4">
+                  <div className="w-1/3">
+                    <label className="block text-sm text-slate-400 mb-1">Label</label>
+                    <select 
+                      className="w-full bg-dark border border-dark-border rounded-lg px-4 py-2 text-white"
+                      value={newAddress.label}
+                      onChange={(e) => setNewAddress({ ...newAddress, label: e.target.value })}
+                    >
+                      <option value="Home">Home</option>
+                      <option value="Office">Office</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div className="w-2/3">
+                    <label className="block text-sm text-slate-400 mb-1">Full Address</label>
+                    <input 
+                      type="text" required
+                      className="w-full bg-dark border border-dark-border rounded-lg px-4 py-2 text-white"
+                      placeholder="e.g. 123 Main St, Apt 4B"
+                      value={newAddress.fullAddress}
+                      onChange={(e) => setNewAddress({ ...newAddress, fullAddress: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3 pt-2">
+                  <button type="button" onClick={() => setIsAddingAddress(false)} className="px-4 py-2 text-slate-400 hover:text-white">Cancel</button>
+                  <button type="submit" disabled={submitting} className="btn-primary py-2 px-6">Save Address</button>
+                </div>
+              </form>
+            )}
+
+            <div className="space-y-3">
+              {addresses.length === 0 && !isAddingAddress && (
+                <div className="text-center py-10 text-slate-500 bg-dark/20 rounded-xl border border-dark-border/50 border-dashed">
+                  <MapPin className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                  <p>No saved addresses yet.</p>
+                </div>
+              )}
+              {addresses.map(addr => (
+                <div key={addr.id} className={`flex items-start justify-between p-4 rounded-xl border ${addr.isDefault ? 'border-primary-500 bg-primary-900/10' : 'border-dark-border bg-dark/40'} transition-all`}>
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1">
+                      {addr.label === 'Home' ? <MapPin className={`w-5 h-5 ${addr.isDefault ? 'text-primary-500' : 'text-slate-400'}`} /> : 
+                       addr.label === 'Office' ? <MapPin className={`w-5 h-5 ${addr.isDefault ? 'text-primary-500' : 'text-slate-400'}`} /> : 
+                       <MapPin className={`w-5 h-5 ${addr.isDefault ? 'text-primary-500' : 'text-slate-400'}`} />}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-white">{addr.label}</span>
+                        {addr.isDefault && <span className="text-[10px] uppercase font-bold bg-primary-500/20 text-primary-400 px-2 py-0.5 rounded-full">Default</span>}
+                      </div>
+                      <p className="text-slate-300 text-sm">{addr.fullAddress}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {!addr.isDefault && (
+                      <button 
+                        onClick={() => handleSetDefaultAddress(addr.id)}
+                        className="p-2 text-slate-400 hover:text-emerald-400 hover:bg-emerald-400/10 rounded-lg transition-colors"
+                        title="Set as Default"
+                      >
+                        <Star className="w-4 h-4" />
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => handleDeleteAddress(addr.id)}
+                      className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                      title="Delete Address"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <p className="text-xs text-slate-500 text-center mt-4 border-t border-dark-border/40 pt-4">
+              You can save up to 5 delivery addresses for quick checkout.
+            </p>
+          </div>
+        )}
       </div>
     </motion.div>
   );

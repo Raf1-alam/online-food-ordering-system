@@ -41,6 +41,12 @@ public class Restaurant {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
+    @Column(name = "opening_time", length = 5)
+    private String openingTime;
+
+    @Column(name = "closing_time", length = 5)
+    private String closingTime;
+
     /**
      * The staff user who owns/manages this restaurant.
      * Used for ownership-based access control (IDOR prevention).
@@ -63,4 +69,23 @@ public class Restaurant {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @Transient
+    public boolean isCurrentlyOpen() {
+        if (openingTime == null || closingTime == null || openingTime.isEmpty() || closingTime.isEmpty()) {
+            return true;
+        }
+        try {
+            java.time.LocalTime now = java.time.LocalTime.now();
+            java.time.LocalTime open = java.time.LocalTime.parse(openingTime);
+            java.time.LocalTime close = java.time.LocalTime.parse(closingTime);
+            if (close.isBefore(open)) {
+                return !now.isBefore(open) || !now.isAfter(close);
+            } else {
+                return !now.isBefore(open) && !now.isAfter(close);
+            }
+        } catch (Exception e) {
+            return true;
+        }
+    }
 }

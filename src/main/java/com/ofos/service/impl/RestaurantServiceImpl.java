@@ -66,6 +66,8 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .address(request.getAddress())
                 .phone(request.getPhone())
                 .imageUrl(request.getImageUrl())
+                .openingTime(request.getOpeningTime())
+                .closingTime(request.getClosingTime())
                 .owner(owner)
                 .active(true)
                 .build();
@@ -96,6 +98,12 @@ public class RestaurantServiceImpl implements RestaurantService {
         if (request.getImageUrl() != null) {
             restaurant.setImageUrl(request.getImageUrl());
         }
+        if (request.getOpeningTime() != null) {
+            restaurant.setOpeningTime(request.getOpeningTime());
+        }
+        if (request.getClosingTime() != null) {
+            restaurant.setClosingTime(request.getClosingTime());
+        }
 
         restaurant = restaurantRepository.save(restaurant);
         log.info("Restaurant updated: {} by user {}", restaurant.getName(), currentUser.getEmail());
@@ -112,6 +120,9 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .address(restaurant.getAddress())
                 .phone(restaurant.getPhone())
                 .imageUrl(restaurant.getImageUrl())
+                .openingTime(restaurant.getOpeningTime())
+                .closingTime(restaurant.getClosingTime())
+                .isCurrentlyOpen(restaurant.isCurrentlyOpen())
                 .ownerId(restaurant.getOwner().getId())
                 .ownerName(restaurant.getOwner().getFullName())
                 .active(restaurant.isActive())

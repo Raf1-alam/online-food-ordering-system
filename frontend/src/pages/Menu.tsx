@@ -17,6 +17,7 @@ const Menu = () => {
   const [error, setError] = useState('');
   const [reviews, setReviews] = useState<any[]>([]);
   const [visibleCount, setVisibleCount] = useState(5);
+  const categoryRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
   
   const { user } = useAuth();
   const { addItem, cart } = useCart();
@@ -78,6 +79,15 @@ const Menu = () => {
     return acc;
   }, {} as Record<string, MenuItem[]>);
 
+  const scrollToCategory = (category: string) => {
+    // Add offset for the sticky header
+    const element = categoryRefs.current[category];
+    if (element) {
+      const y = element.getBoundingClientRect().top + window.scrollY - 100;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
+
   if (loading) return (
     <div className="flex justify-center items-center h-screen">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
@@ -109,12 +119,22 @@ const Menu = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-primary-900/30 to-transparent pointer-events-none mix-blend-overlay"></div>
         
         <div className="relative z-10">
-          <motion.h1 
-            initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
-            className="text-5xl font-bold text-white mb-3"
-          >
-            {restaurant?.name}
-          </motion.h1>
+          <div className="flex items-center gap-3 mb-3">
+            <motion.h1 
+              initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
+              className="text-5xl font-bold text-white"
+            >
+              {restaurant?.name}
+            </motion.h1>
+            {restaurant?.isCurrentlyOpen === false && (
+              <motion.span 
+                initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
+                className="px-3 py-1 bg-red-600/90 text-white text-sm font-bold rounded-full border border-red-400/50"
+              >
+                CLOSED
+              </motion.span>
+            )}
+          </div>
           <motion.p 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
             className="text-xl text-slate-300 max-w-2xl mb-4"
@@ -130,9 +150,22 @@ const Menu = () => {
         </div>
       </motion.div>
 
+      {restaurant?.isCurrentlyOpen === false && (
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+          className="p-5 bg-red-950/40 border-l-4 border-red-500 rounded-r-xl flex items-start gap-4 text-red-200 backdrop-blur-md shadow-lg"
+        >
+          <AlertCircle className="h-6 w-6 text-red-500 shrink-0 mt-0.5" /> 
+          <div>
+            <h3 className="font-bold text-lg text-white mb-1">This restaurant is currently closed</h3>
+            <p className="text-red-300">You can browse the menu, but placing orders is disabled until they reopen.</p>
+          </div>
+        </motion.div>
+      )}
+
       {error && (
         <div className="p-4 bg-red-900/30 border border-red-500/50 rounded-lg flex items-center gap-2 text-red-200">
-          <AlertCircle className="h-5 w-5" /> {error}
+          <AlertCircle className="h-5 w-5 shrink-0" /> {error}
         </div>
       )}
 
@@ -148,15 +181,38 @@ const Menu = () => {
         />
       </div>
 
+      {/* Category Tabs */}
+      {Object.keys(groupedMenu).length > 0 && (
+        <div className="sticky top-[70px] z-40 bg-dark/90 backdrop-blur-md py-4 border-b border-dark-border -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-2 overflow-x-auto custom-scrollbar shadow-lg">
+          <button 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="whitespace-nowrap px-5 py-2 rounded-full text-sm font-semibold transition-all bg-dark-card text-slate-300 hover:text-white border border-dark-border hover:border-primary-500/50"
+          >
+            Top
+          </button>
+          {Object.keys(groupedMenu).map((category) => (
+            <button
+              key={category}
+              onClick={() => scrollToCategory(category)}
+              className="whitespace-nowrap px-5 py-2 rounded-full text-sm font-semibold transition-all bg-dark-card text-slate-300 hover:text-white hover:bg-primary-500/20 border border-dark-border hover:border-primary-500/50"
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Menu Categories */}
       <div className="space-y-12">
         <AnimatePresence>
           {Object.entries(groupedMenu).map(([category, items], catIdx) => (
             <motion.div 
               key={category}
+              ref={(el) => { categoryRefs.current[category] = el; }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: catIdx * 0.1 }}
+              className="scroll-mt-32"
             >
               <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
                 {category}
@@ -196,12 +252,15 @@ const Menu = () => {
                     
                     <div className="flex flex-col justify-end">
                       <motion.button 
-                        whileTap={{ scale: 0.9 }}
+                        whileTap={restaurant?.isCurrentlyOpen === false ? {} : { scale: 0.9 }}
                         onClick={() => handleAddToCart(item)}
+                        disabled={restaurant?.isCurrentlyOpen === false}
                         className={`h-12 w-12 rounded-xl flex items-center justify-center transition-all shadow-md ${
-                          addingItem === item.id 
-                            ? 'bg-accent-green text-white shadow-[0_0_20px_rgba(52,211,42,0.4)]' 
-                            : 'bg-dark border border-dark-border text-slate-300 hover:bg-accent-green hover:text-white hover:border-accent-green hover:shadow-[0_0_20px_rgba(52,211,42,0.3)]'
+                          restaurant?.isCurrentlyOpen === false
+                            ? 'bg-dark-card border border-dark-border text-slate-500 cursor-not-allowed opacity-50'
+                            : addingItem === item.id 
+                              ? 'bg-accent-green text-white shadow-[0_0_20px_rgba(52,211,42,0.4)]' 
+                              : 'bg-dark border border-dark-border text-slate-300 hover:bg-accent-green hover:text-white hover:border-accent-green hover:shadow-[0_0_20px_rgba(52,211,42,0.3)]'
                         }`}
                         aria-label="Add to cart"
                       >

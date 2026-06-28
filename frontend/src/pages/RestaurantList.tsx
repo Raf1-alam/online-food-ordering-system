@@ -169,6 +169,13 @@ const RestaurantList = () => {
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className={`w-5 h-5 ${favorites.has(restaurant.id) ? 'text-primary-500 fill-primary-500 shadow-[0_0_15px_rgba(255,30,56,0.8)]' : 'text-slate-400'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
                   </button>
+                  
+                  {/* Status Badge */}
+                  <div className="absolute bottom-4 left-4 z-20">
+                    <span className={`px-3 py-1 text-xs font-bold rounded-full shadow-lg border backdrop-blur-md ${restaurant.isCurrentlyOpen === false ? 'bg-red-500/80 text-white border-red-400/50' : 'bg-emerald-500/80 text-white border-emerald-400/50'}`}>
+                      {restaurant.isCurrentlyOpen === false ? 'CLOSED' : 'OPEN'}
+                    </span>
+                  </div>
                 </div>
                 
                 <div className="p-5">

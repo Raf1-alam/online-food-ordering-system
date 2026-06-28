@@ -6,13 +6,16 @@ import com.ofos.model.dto.request.LoginRequest;
 import com.ofos.model.dto.request.RefreshTokenRequest;
 import com.ofos.model.dto.request.RegisterRequest;
 import com.ofos.model.dto.response.AuthResponse;
+import com.ofos.model.entity.PasswordResetToken;
 import com.ofos.model.entity.RefreshToken;
 import com.ofos.model.entity.User;
 import com.ofos.model.enums.Role;
+import com.ofos.repository.PasswordResetTokenRepository;
 import com.ofos.repository.RefreshTokenRepository;
 import com.ofos.repository.UserRepository;
 import com.ofos.security.JwtTokenProvider;
 import com.ofos.service.AuthService;
+import com.ofos.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,9 +42,11 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
 
     @Value("${app.jwt.refresh-token-expiration-ms}")
     private long refreshTokenExpirationMs;
@@ -134,6 +139,53 @@ public class AuthServiceImpl implements AuthService {
                     refreshTokenRepository.save(token);
                     log.info("User logged out: {}", token.getUser().getEmail());
                 });
+    }
+
+    @Override
+    @Transactional
+    public void forgotPassword(String email) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            // Silently return to prevent email enumeration attacks
+            return;
+        }
+
+        // Delete any existing tokens
+        passwordResetTokenRepository.deleteByUser_Id(user.getId());
+
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(token)
+                .user(user)
+                .expiryDate(LocalDateTime.now().plusHours(1))
+                .build();
+        passwordResetTokenRepository.save(resetToken);
+
+        // Send email
+        String resetLink = "http://localhost:5173/reset-password?token=" + token;
+        String emailText = "You requested a password reset. Click the link below to reset your password:\n\n"
+                + resetLink + "\n\nThis link will expire in 1 hour.";
+        
+        emailService.sendEmail(user.getEmail(), "Password Reset Request", emailText);
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid or expired password reset token"));
+
+        if (resetToken.isExpired()) {
+            passwordResetTokenRepository.delete(resetToken);
+            throw new IllegalArgumentException("Password reset token has expired");
+        }
+
+        User user = resetToken.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        passwordResetTokenRepository.delete(resetToken);
+        log.info("Password reset successfully for user: {}", user.getEmail());
     }
 
     // ==================== Private Helpers ====================
