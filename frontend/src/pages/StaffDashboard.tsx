@@ -9,6 +9,14 @@ import Pagination from '../components/Pagination';
 const ORDER_STATES = ['PLACED', 'CONFIRMED', 'PREPARING', 'OUT_FOR_DELIVERY', 'DELIVERED'];
 const TERMINAL_STATES = ['DELIVERED', 'CANCELLED'];
 
+// Backend stores estimatedDeliveryTime as a plain LocalDateTime (no timezone).
+// We must send local wall-clock time here, NOT toISOString() (which is UTC),
+// otherwise the value gets shifted by the timezone offset when round-tripped.
+const toLocalIsoString = (date: Date) => {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+};
+
 const StaffDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,6 +26,10 @@ const StaffDashboard = () => {
 
   const [restaurantId, setRestaurantId] = useState(null);
   const [restaurant, setRestaurant] = useState(null);
+
+  // Holds the staff-entered ETA (in minutes) per order, keyed by order id,
+  // used only while an order is still PLACED and awaiting confirmation.
+  const [etaMinutesByOrder, setEtaMinutesByOrder] = useState<Record<number, string>>({});
 
   const [settingsForm, setSettingsForm] = useState({
     name: '',
@@ -91,12 +103,36 @@ const StaffDashboard = () => {
 
     const nextStatus = ORDER_STATES[currentIndex + 1];
 
+    // When confirming an order (PLACED -> CONFIRMED), include the ETA the
+    // staff entered so the customer sees it on their Orders page.
+    const payload: { status: string; estimatedDeliveryTime?: string } = { status: nextStatus };
+
+    if (nextStatus === 'CONFIRMED') {
+      const minutesStr = etaMinutesByOrder[orderId];
+      const minutes = parseInt(minutesStr, 10);
+      if (!minutesStr || isNaN(minutes) || minutes <= 0) {
+        alert('Please enter a valid estimated delivery time (in minutes) before confirming.');
+        return;
+      }
+      const eta = new Date(Date.now() + minutes * 60 * 1000);
+      payload.estimatedDeliveryTime = toLocalIsoString(eta);
+    }
+
     try {
-      const res = await api.patch(`/restaurant-staff/orders/${orderId}/status`, { status: nextStatus });
+      const res = await api.patch(`/restaurant-staff/orders/${orderId}/status`, payload);
       setOrders(orders.map(o => o.id === orderId ? res.data.data : o));
+      setEtaMinutesByOrder(prev => {
+        const next = { ...prev };
+        delete next[orderId];
+        return next;
+      });
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update order status');
     }
+  };
+
+  const handleEtaInputChange = (orderId: number, value: string) => {
+    setEtaMinutesByOrder(prev => ({ ...prev, [orderId]: value }));
   };
 
   const handleSettingsChange = (e) => {
@@ -137,6 +173,11 @@ const StaffDashboard = () => {
     }
   };
 
+  const formatEta = (eta: string) => {
+    const date = new Date(eta);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
   const activeOrders = orders.filter((o: any) => !TERMINAL_STATES.includes(o.status));
   const historyOrders = orders.filter((o: any) => TERMINAL_STATES.includes(o.status));
 
@@ -149,28 +190,28 @@ const StaffDashboard = () => {
         {/* Toast Notifications */}
         <AnimatePresence>
           {settingsSuccess && (
-            <motion.div
-              key="settings-success-toast"
-              initial={{ opacity: 0, x: 80 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 80 }}
-              className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 bg-emerald-900/90 border border-emerald-500/50 rounded-xl text-emerald-200 text-sm shadow-2xl backdrop-blur-md"
-            >
-              <CheckCircle className="h-5 w-5 shrink-0" />
-              {settingsSuccess}
-            </motion.div>
+              <motion.div
+                  key="settings-success-toast"
+                  initial={{ opacity: 0, x: 80 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 80 }}
+                  className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 bg-emerald-900/90 border border-emerald-500/50 rounded-xl text-emerald-200 text-sm shadow-2xl backdrop-blur-md"
+              >
+                <CheckCircle className="h-5 w-5 shrink-0" />
+                {settingsSuccess}
+              </motion.div>
           )}
           {settingsError && (
-            <motion.div
-              key="settings-error-toast"
-              initial={{ opacity: 0, x: 80 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 80 }}
-              className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 bg-red-900/90 border border-red-500/50 rounded-xl text-red-200 text-sm shadow-2xl backdrop-blur-md"
-            >
-              <XCircle className="h-5 w-5 shrink-0" />
-              {settingsError}
-            </motion.div>
+              <motion.div
+                  key="settings-error-toast"
+                  initial={{ opacity: 0, x: 80 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 80 }}
+                  className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 bg-red-900/90 border border-red-500/50 rounded-xl text-red-200 text-sm shadow-2xl backdrop-blur-md"
+              >
+                <XCircle className="h-5 w-5 shrink-0" />
+                {settingsError}
+              </motion.div>
           )}
         </AnimatePresence>
 
@@ -397,6 +438,14 @@ const StaffDashboard = () => {
                         </div>
                       </div>
 
+                      {/* ETA badge - shown once an estimated delivery time has been set */}
+                      {order.estimatedDeliveryTime && !TERMINAL_STATES.includes(order.status) && (
+                          <div className="mb-3 flex items-center gap-2 text-xs text-primary-400 bg-primary-500/10 border border-primary-500/20 rounded-lg px-3 py-1.5 w-fit">
+                            <Clock className="h-3.5 w-3.5" />
+                            <span>ETA: <strong className="text-white">{formatEta(order.estimatedDeliveryTime)}</strong></span>
+                          </div>
+                      )}
+
                       <div className="space-y-2 mb-4 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                         {order.items.map(item => (
                             <div key={item.id} className="flex justify-between text-sm">
@@ -412,6 +461,23 @@ const StaffDashboard = () => {
                         <div className="text-xs text-slate-400 mb-4 line-clamp-2">
                           <span className="font-semibold text-slate-300">Deliver to:</span> {order.deliveryAddress}
                         </div>
+
+                        {/* ETA input - only needed when confirming a freshly PLACED order */}
+                        {activeTab === 'ACTIVE' && order.status === 'PLACED' && (
+                            <div className="mb-3">
+                              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                                Estimated delivery time (minutes from now)
+                              </label>
+                              <input
+                                  type="number"
+                                  min="1"
+                                  placeholder="e.g. 30"
+                                  value={etaMinutesByOrder[order.id] || ''}
+                                  onChange={(e) => handleEtaInputChange(order.id, e.target.value)}
+                                  className="input-field py-2 text-sm"
+                              />
+                            </div>
+                        )}
 
                         {activeTab === 'ACTIVE' && (
                             <button
