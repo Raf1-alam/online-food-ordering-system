@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import api from '../services/api';
 import { Order } from '../types';
-import { Package, ChefHat, Truck, CheckCircle, XCircle, Star, X } from 'lucide-react';
+import { Package, ChefHat, Truck, CheckCircle, XCircle, Star, X, Clock } from 'lucide-react';
 import Pagination from '../components/Pagination';
 
 const Orders = () => {
@@ -135,6 +135,14 @@ const Orders = () => {
     { num: 4, name: 'Delivered', icon: <CheckCircle className="h-5 w-5" /> }
   ];
 
+  const formatEta = (eta: string) => {
+    const date = new Date(eta);
+    const now = new Date();
+    const sameDay = date.toDateString() === now.toDateString();
+    const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return sameDay ? time : `${date.toLocaleDateString()} ${time}`;
+  };
+
   if (loading) {
     return (
         <div className="flex justify-center items-center py-32">
@@ -157,6 +165,7 @@ const Orders = () => {
             <div className="space-y-8">
               {orders.map((order, idx) => {
                 const isCancelled = order.status === 'CANCELLED';
+                const isDelivered = order.status === 'DELIVERED';
                 const currentStep = getStatusStep(order.status);
 
                 return (
@@ -180,6 +189,17 @@ const Orders = () => {
                           <p className="text-xs text-slate-500 mt-1">Paid via: {order.payment?.method?.replace(/_/g, ' ') || 'CASH ON DELIVERY'}</p>
                         </div>
                       </div>
+
+                      {/* Estimated Delivery Time - shown for active (non-cancelled, non-delivered) orders */}
+                      {!isCancelled && !isDelivered && order.estimatedDeliveryTime && (
+                          <div className="mb-6 flex items-center gap-2 text-sm text-primary-400 bg-primary-500/10 border border-primary-500/20 rounded-xl px-4 py-2.5 w-fit">
+                            <Clock className="h-4 w-4" />
+                            <span>
+                              Estimated delivery by{' '}
+                              <strong className="text-white">{formatEta(order.estimatedDeliveryTime)}</strong>
+                            </span>
+                          </div>
+                      )}
 
                       {/* Items List */}
                       <div className="space-y-3 mb-8 bg-dark/40 border border-dark-border/40 p-5 rounded-2xl">
