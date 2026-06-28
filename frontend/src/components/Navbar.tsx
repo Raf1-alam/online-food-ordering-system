@@ -120,16 +120,15 @@ const Navbar = ({ onCartClick }: { onCartClick: () => void }) => {
                       <p className="text-xs text-slate-400 truncate mt-0.5">{user.email}</p>
                     </div>
                     
-                    <Link 
-                      to="/profile" 
-                      onClick={() => setIsDropdownOpen(false)}
-                      className="flex items-center px-4 py-2.5 text-sm text-slate-300 hover:text-primary-400 hover:bg-dark-border/50 transition-colors"
-                    >
-                      <UserIcon className="h-4 w-4 mr-3" /> Profile
-                    </Link>
-                    
                     {user.role === 'CUSTOMER' && (
                       <>
+                        <Link 
+                          to="/profile" 
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="flex items-center px-4 py-2.5 text-sm text-slate-300 hover:text-primary-400 hover:bg-dark-border/50 transition-colors"
+                        >
+                          <UserIcon className="h-4 w-4 mr-3" /> Profile
+                        </Link>
                         <Link 
                           to="/orders" 
                           onClick={() => setIsDropdownOpen(false)}

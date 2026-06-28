@@ -365,6 +365,10 @@ const StaffDashboard = () => {
                       <MapPicker 
                         initialPosition={settingsForm.latitude && settingsForm.longitude ? [settingsForm.latitude, settingsForm.longitude] : undefined}
                         onPositionChange={(pos) => setSettingsForm(prev => ({ ...prev, latitude: pos[0], longitude: pos[1] }))}
+                        showSaveButton={true}
+                        onSave={() => handleSettingsSave({ preventDefault: () => {} })}
+                        saving={settingsSaving}
+                        saved={!!settingsSuccess}
                       />
                     </div>
                   </div>
