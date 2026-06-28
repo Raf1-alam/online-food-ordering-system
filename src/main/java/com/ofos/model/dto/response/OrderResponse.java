@@ -29,6 +29,7 @@ public class OrderResponse {
     private String couponCode;
     private OrderStatus status;
     private String deliveryAddress;
+    private LocalDateTime estimatedDeliveryTime;
     private PaymentInfo payment;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
