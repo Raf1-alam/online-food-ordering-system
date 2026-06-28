@@ -67,6 +67,7 @@ export interface Order {
   status: 'PLACED' | 'CONFIRMED' | 'PREPARING' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'CANCELLED';
   totalAmount: number;
   deliveryAddress: string;
+  estimatedDeliveryTime?: string;
   items: OrderItem[];
   payment?: PaymentInfo;
   createdAt: string;
